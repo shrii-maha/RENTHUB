@@ -13,12 +13,14 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Invoice from './pages/Invoice';
 import PaymentSuccess from './pages/PaymentSuccess';
+import VerifyPhone from './pages/VerifyPhone';
 
 // Admin Pages
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminItems from './pages/admin/AdminItems';
+import AdminRentals from './pages/admin/AdminRentals';
 
 function App() {
   return (
@@ -38,6 +40,7 @@ function App() {
               {/* Auth Routes */}
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/verify-phone" element={<VerifyPhone />} />
               
               {/* Protected User Routes */}
               <Route path="/dashboard" element={<Dashboard />} />
@@ -51,6 +54,7 @@ function App() {
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/admin/users" element={<AdminUsers />} />
               <Route path="/admin/items" element={<AdminItems />} />
+              <Route path="/admin/rentals" element={<AdminRentals />} />
             </Routes>
           </main>
           <footer className="bg-dark text-white text-center p-4 mt-auto">

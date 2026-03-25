@@ -36,6 +36,20 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  isBlocked: {
+    type: Boolean,
+    default: false
+  },
+  otpCode: {
+    type: String
+  },
+  otpExpires: {
+    type: Date
+  },
   // Bank details
   bankName: {
     type: String,

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Shield, Clock, CreditCard } from 'lucide-react';
 import api from '../api/axios';
+import { getImageUrl } from '../utils/imageUtils';
 
 const Home = () => {
   const [featuredItems, setFeaturedItems] = useState([]);
@@ -70,7 +71,7 @@ const Home = () => {
             <div key={item._id} className="card p-0 overflow-hidden flex flex-col">
               <div style={{ height: '200px', backgroundColor: '#e2e8f0' }}>
                 {item.imageFilename ? (
-                  <img src={`http://localhost:5000/uploads/${item.imageFilename}`} alt={item.name} className="object-cover" />
+                  <img src={getImageUrl(item.imageFilename)} alt={item.name} className="object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted">No Image</div>
                 )}

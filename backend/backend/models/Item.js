@@ -26,6 +26,10 @@ const ItemSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'Please add a rental price']
   },
+  depositAmount: {
+    type: Number,
+    default: 0
+  },
   imageFilename: {
     type: String,
     default: ''

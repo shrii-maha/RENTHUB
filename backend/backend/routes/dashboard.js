@@ -11,15 +11,15 @@ const { protect } = require('../middleware/auth');
 router.get('/', protect, async (req, res) => {
   try {
     const userId = req.user.id;
-    
+
     // Get user's items
     const myItems = await Item.find({ owner: userId }).populate({
       path: 'rentals',
       populate: { path: 'renter', select: 'fullName email phone' }
-    });
-    
+    }).maxTimeMS(2000);
+
     // Get user's bank details
-    const user = await User.findById(userId).select('bankName accountHolderName accountNumber ifscCode');
+    const user = await User.findById(userId).select('bankName accountHolderName accountNumber ifscCode').maxTimeMS(2000);
 
     let pendingRequests = [];
     let rentedOut = [];
@@ -61,7 +61,7 @@ router.get('/', protect, async (req, res) => {
 router.patch('/bank', protect, async (req, res) => {
   try {
     const { bankName, accountHolderName, accountNumber, ifscCode } = req.body;
-    
+
     const user = await User.findByIdAndUpdate(req.user.id, {
       bankName, accountHolderName, accountNumber, ifscCode
     }, { new: true, runValidators: true });

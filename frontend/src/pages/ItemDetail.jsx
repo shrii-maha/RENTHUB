@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import AuthContext from '../context/AuthContext';
 import { Star, ShieldCheck, User } from 'lucide-react';
+import { getImageUrl } from '../utils/imageUtils';
 
 const ItemDetail = () => {
   const { id } = useParams();
@@ -87,7 +88,7 @@ const ItemDetail = () => {
           <div className="card p-0 overflow-hidden" style={{ borderRadius: '16px' }}>
             <div style={{ height: '400px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {item.imageFilename ? (
-                <img src={`http://localhost:5000/uploads/${item.imageFilename}`} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={getImageUrl(item.imageFilename)} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <span className="text-muted text-lg flex items-center gap-2"><Package size={24}/> No Image Provided</span>
               )}
@@ -100,8 +101,8 @@ const ItemDetail = () => {
             
             <div className="mt-6 pt-6 border-t flex flex-wrap gap-4">
               <div className="flex items-center gap-2 text-muted">
-                <ShieldCheck size={20} className="text-primary" />
-                <span>Verified Owner: {item.owner.fullName}</span>
+                <ShieldCheck size={20} className={item.owner.isVerified ? "text-emerald-500" : "text-primary"} />
+                <span>{item.owner.isVerified ? 'Verified Owner' : 'Owner'}: {item.owner.fullName}</span>
               </div>
             </div>
           </div>
@@ -162,6 +163,9 @@ const ItemDetail = () => {
               <span className="badge badge-info uppercase mb-2">{item.category}</span>
               <h1 className="mb-2" style={{ fontSize: '2rem' }}>{item.name}</h1>
               <div className="text-3xl font-bold text-primary">₹{item.rentalPrice} <span className="text-lg text-muted font-normal">/ day</span></div>
+              {item.depositAmount > 0 && (
+                <div className="text-sm font-medium text-amber-600 mt-1">+ ₹{item.depositAmount} security deposit</div>
+              )}
             </div>
 
             <div className="mb-6">
@@ -202,13 +206,17 @@ const ItemDetail = () => {
                 </div>
 
                 <div className="bg-slate-50 p-4 rounded-lg mb-6 border">
-                  <div className="flex justify-between mb-2 text-muted">
-                    <span>₹{item.rentalPrice} x {rentalDays} days</span>
+                  <div className="flex justify-between mb-1 text-muted text-sm">
+                    <span>Rent (₹{item.rentalPrice} x {rentalDays})</span>
                     <span>₹{item.rentalPrice * rentalDays}</span>
                   </div>
+                  <div className="flex justify-between mb-2 text-muted text-sm">
+                    <span>Security Deposit</span>
+                    <span>₹{item.depositAmount || 0}</span>
+                  </div>
                   <div className="flex justify-between border-t pt-2 font-bold text-lg mt-2">
-                    <span>Total</span>
-                    <span className="text-primary">₹{item.rentalPrice * rentalDays}</span>
+                    <span>Total Pay</span>
+                    <span className="text-primary">₹{(item.rentalPrice * rentalDays) + (item.depositAmount || 0)}</span>
                   </div>
                 </div>
 
@@ -235,7 +243,7 @@ const ItemDetail = () => {
              {relatedItems.map(item => (
                 <div key={item._id} className="card p-0 overflow-hidden flex flex-col">
                   <Link to={`/item/${item._id}`} style={{ display: 'block' }}>
-                    <div style={{ height: '140px', backgroundColor: '#e2e8f0', backgroundImage: `url(http://localhost:5000/uploads/${item.imageFilename})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                    <div style={{ height: '140px', backgroundColor: '#e2e8f0', backgroundImage: `url(${getImageUrl(item.imageFilename)})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
                       {!item.imageFilename && <div className="w-full h-full flex items-center justify-center text-muted text-sm">No Image</div>}
                     </div>
                   </Link>

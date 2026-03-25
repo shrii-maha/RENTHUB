@@ -30,9 +30,10 @@ router.post('/checkout/:rentalId', protect, async (req, res) => {
           price_data: {
             currency: 'inr',
             product_data: {
-              name: `Rental Checkout: ${rental.item.name}`
+              name: `Rental Checkout: ${rental.item.name}`,
+              description: `Rent: ₹${rental.totalPrice} + Security Deposit: ₹${rental.depositAmount}`
             },
-            unit_amount: rental.totalPrice * 100 // Stripe expects amount in cents/paise
+            unit_amount: (rental.totalPrice + rental.depositAmount) * 100 // Stripe expects amount in cents/paise
           },
           quantity: 1
         }
@@ -116,6 +117,22 @@ router.post('/success/:rentalId', protect, async (req, res) => {
           <p>Hi ${populatedRental.item.owner.fullName},</p>
           <p>Great news! Your item <strong>${populatedRental.item.name}</strong> has been successfully rented out to ${populatedRental.renter.fullName}.</p>
           <p>The deal is successful, and the rental is now active. You can check your dashboard for details.</p>
+        `
+      });
+      
+      // Email to Admin
+      await sendEmail({
+        email: process.env.FROM_EMAIL, // Sending to the configured admin email
+        subject: `ALERT: New Booking on RentHub! - Dealer: ${populatedRental.item.owner.fullName}`,
+        html: `
+          <h1>New Transaction!</h1>
+          <p>A new booking has been completed on the platform.</p>
+          <p><strong>Item:</strong> ${populatedRental.item.name}</p>
+          <p><strong>Renter:</strong> ${populatedRental.renter.fullName} (${populatedRental.renter.email})</p>
+          <p><strong>Owner:</strong> ${populatedRental.item.owner.fullName} (${populatedRental.item.owner.email})</p>
+          <p><strong>Total Price:</strong> ₹${populatedRental.totalPrice}</p>
+          <p><strong>Deposit:</strong> ₹${populatedRental.depositAmount}</p>
+          <p><a href="${process.env.CLIENT_URL}/admin/rentals">Review in Admin Panel</a></p>
         `
       });
       

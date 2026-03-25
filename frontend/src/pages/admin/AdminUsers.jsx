@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import api from '../../api/axios';
 import AuthContext from '../../context/AuthContext';
 import AdminNav from '../../components/AdminNav';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Ban, Check } from 'lucide-react';
 
 const AdminUsers = () => {
   const { user } = useContext(AuthContext);
@@ -40,10 +40,19 @@ const AdminUsers = () => {
     }
   };
 
+  const handleToggleBlock = async (userId) => {
+    try {
+      await api.patch(`/admin/users/${userId}/toggle-block`);
+      fetchUsers();
+    } catch (err) {
+      alert('Error toggling user block status');
+    }
+  };
+
   return (
     <div className="fade-in py-4">
       <h1 className="mb-2">Manage Users</h1>
-      <p className="text-muted mb-8">View and remove platform users.</p>
+      <p className="text-muted mb-8">View and manage platform users.</p>
       
       <AdminNav />
 
@@ -59,8 +68,9 @@ const AdminUsers = () => {
                 <th className="py-2">Name</th>
                 <th className="py-2">Email</th>
                 <th className="py-2">Phone</th>
+                <th className="py-2">Status</th>
                 <th className="py-2">Joined</th>
-                <th className="py-2 text-center">Action</th>
+                <th className="py-2 text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -69,8 +79,21 @@ const AdminUsers = () => {
                   <td className="py-3 font-medium">{u.fullName}</td>
                   <td className="py-3 text-muted">{u.email}</td>
                   <td className="py-3">{u.phoneNumber}</td>
+                  <td className="py-3">
+                    <span className={`badge ${u.isBlocked ? 'badge-danger' : 'badge-success'}`}>
+                      {u.isBlocked ? 'Blocked' : 'Active'}
+                    </span>
+                  </td>
                   <td className="py-3 text-sm">{new Date(u.createdAt).toLocaleDateString()}</td>
-                  <td className="py-3 text-center">
+                  <td className="py-3 text-center flex justify-center gap-2">
+                    <button 
+                      onClick={() => handleToggleBlock(u._id)} 
+                      className={`btn ${u.isBlocked ? 'btn-success' : 'btn-outline'}`} 
+                      style={{ padding: '0.25rem 0.5rem' }} 
+                      title={u.isBlocked ? 'Unblock User' : 'Block User'}
+                    >
+                      {u.isBlocked ? <Check size={16} /> : <Ban size={16} />}
+                    </button>
                     <button onClick={() => handleDelete(u._id)} className="btn btn-danger" style={{ padding: '0.25rem 0.5rem' }} title="Delete User">
                       <Trash2 size={16} />
                     </button>

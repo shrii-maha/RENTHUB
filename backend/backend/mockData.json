@@ -1,0 +1,39 @@
+{
+  "users": [
+    {
+      "_id": "b3f1687b3911a3388cf032d9",
+      "fullName": "John Doe",
+      "email": "john@test.com",
+      "password": "password123",
+      "phoneNumber": "1234567890",
+      "address": "123 Test St",
+      "isAdmin": false,
+      "isVerified": true
+    },
+    {
+      "_id": "63afb9c70f3d2d1ce6bd7f0e",
+      "fullName": "Jane Doe",
+      "email": "jane@test.com",
+      "password": "password123",
+      "phoneNumber": "1234567890",
+      "address": "123 Test St",
+      "isAdmin": false,
+      "isVerified": true
+    },
+    {
+      "_id": "d01eb595bdb75852f2a785f6",
+      "fullName": "shrii carzy",
+      "email": "ssm47@gmail.com",
+      "phoneNumber": "8097831527",
+      "address": "Sandesh Nagar , Bail Bazar , Kural west , Mumbai - 400070Kurla - Andheri",
+      "password": "123456",
+      "confirmPassword": "123456",
+      "bankName": "",
+      "accountHolderName": "",
+      "accountNumber": "",
+      "ifscCode": "",
+      "isAdmin": false,
+      "isVerified": true
+    }
+  ]
+}

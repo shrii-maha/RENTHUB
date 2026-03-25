@@ -13,6 +13,7 @@ const AddItem = () => {
     description: '',
     category: 'other',
     rentalPrice: '',
+    depositAmount: '',
     isAvailable: 'true'
   });
   const [image, setImage] = useState(null);
@@ -95,6 +96,11 @@ const AddItem = () => {
           <div className="form-group col-span-2 sm:col-span-1">
             <label className="form-label">Rental Price (₹ per day)</label>
             <input type="number" className="form-control" name="rentalPrice" value={formData.rentalPrice} onChange={handleChange} required min="1" step="0.01" />
+          </div>
+
+          <div className="form-group col-span-2 sm:col-span-1">
+            <label className="form-label">Security Deposit (₹)</label>
+            <input type="number" className="form-control" name="depositAmount" value={formData.depositAmount} onChange={handleChange} required min="0" step="0.01" />
           </div>
 
           <div className="form-group col-span-2 sm:col-span-1">

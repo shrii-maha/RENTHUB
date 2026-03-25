@@ -15,12 +15,16 @@ router.use(adminOnly);
 // @access  Private/Admin
 router.get('/stats', async (req, res) => {
   try {
-    const totalUsers = await User.countDocuments({ isAdmin: false });
-    const totalItems = await Item.countDocuments();
-    const totalRentals = await Rental.countDocuments();
+    console.log('Fetching admin stats...');
     
-    // Calculate total revenue from active/completed rentals
-    const rentals = await Rental.find({ status: { $in: ['Active', 'Completed'] } });
+    const [totalUsers, totalItems, totalRentals, rentals] = await Promise.all([
+      User.countDocuments({ isAdmin: false }).maxTimeMS(2000),
+      Item.countDocuments().maxTimeMS(2000),
+      Rental.countDocuments().maxTimeMS(2000),
+      Rental.find({ status: { $in: ['Active', 'Completed'] } }).maxTimeMS(2000)
+    ]);
+    
+    console.log('Stats queries completed');
     const totalRevenue = rentals.reduce((acc, curr) => acc + curr.totalPrice, 0);
 
     res.status(200).json({
@@ -33,6 +37,7 @@ router.get('/stats', async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Error in /admin/stats:', error.message);
     res.status(400).json({ success: false, error: error.message });
   }
 });
@@ -91,6 +96,43 @@ router.get('/items', async (req, res) => {
   try {
     const items = await Item.find().populate('owner', 'fullName email').sort('-createdAt');
     res.status(200).json({ success: true, count: items.length, data: items });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// @desc    Get all rentals (bookings)
+// @route   GET /api/admin/rentals
+// @access  Private/Admin
+router.get('/rentals', async (req, res) => {
+  try {
+    const rentals = await Rental.find()
+      .populate('renter', 'fullName email')
+      .populate({
+        path: 'item',
+        populate: { path: 'owner', select: 'fullName email' }
+      })
+      .sort('-createdAt');
+    res.status(200).json({ success: true, count: rentals.length, data: rentals });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// @desc    Toggle user block status
+// @route   PATCH /api/admin/users/:id/toggle-block
+// @access  Private/Admin
+router.patch('/users/:id/toggle-block', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    user.isBlocked = !user.isBlocked;
+    await user.save();
+
+    res.status(200).json({ success: true, data: user });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }

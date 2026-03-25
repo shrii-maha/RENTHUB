@@ -38,7 +38,7 @@ const Register = () => {
 
     try {
       await register(formData);
-      navigate('/dashboard');
+      navigate('/verify-phone');
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed');
     } finally {

@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 import api from '../api/axios';
 import AuthContext from '../context/AuthContext';
 import { CalendarClock, CreditCard, QrCode, X, ExternalLink, Download } from 'lucide-react';
+import { getImageUrl } from '../utils/imageUtils';
 
 const MyRentals = () => {
   const { user } = useContext(AuthContext);
@@ -76,7 +77,7 @@ const MyRentals = () => {
             <div key={rental._id} className="card p-0 overflow-hidden flex" style={{ flexDirection: 'row' }}>
               <div style={{ width: '200px', backgroundColor: '#e2e8f0', flexShrink: 0 }}>
                 {rental.item?.imageFilename ? (
-                  <img src={`http://localhost:5000/uploads/${rental.item.imageFilename}`} alt={rental.item.name} className="object-cover" />
+                  <img src={getImageUrl(rental.item.imageFilename)} alt={rental.item.name} className="object-cover" />
                 ) : (
                    <div className="w-full h-full flex items-center justify-center text-muted">No Image</div>
                 )}
@@ -88,7 +89,9 @@ const MyRentals = () => {
                     <span className={`badge ${getStatusBadge(rental.status)}`}>{rental.status}</span>
                   </div>
                   <p className="text-muted mb-1">Owner: {rental.item?.owner?.fullName || 'Unknown'}</p>
-                  <p className="font-bold text-lg mb-4">Total: ₹{rental.totalPrice}</p>
+                  <p className="font-bold text-lg mb-0 text-primary">Rent: ₹{rental.totalPrice}</p>
+                  <p className="font-bold text-lg mb-1 text-amber-600">Deposit: ₹{rental.depositAmount || 0}</p>
+                  <p className="font-bold text-xl mb-4 border-t pt-2">Total: ₹{rental.totalPrice + (rental.depositAmount || 0)}</p>
                 </div>
                 
                 <div className="pt-4 border-t" style={{ borderColor: 'rgba(0,0,0,0.1)' }}>
@@ -103,7 +106,7 @@ const MyRentals = () => {
                         className="btn btn-primary flex items-center gap-2"
                         disabled={initiating}
                       >
-                        <CreditCard size={18} /> {initiating ? 'Processing...' : `Pay ₹${rental.totalPrice}`}
+                        <CreditCard size={18} /> {initiating ? 'Processing...' : `Pay ₹${rental.totalPrice + (rental.depositAmount || 0)}`}
                       </button>
                     </div>
                   )}

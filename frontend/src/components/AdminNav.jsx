@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Package } from 'lucide-react';
+import { LayoutDashboard, Users, Package, RefreshCw } from 'lucide-react';
 
 const AdminNav = () => {
   const location = useLocation();
@@ -15,6 +15,9 @@ const AdminNav = () => {
       </Link>
       <Link to="/admin/items" className={`btn ${path.includes('/admin/items') ? 'btn-primary' : 'btn-outline'} flex items-center gap-2`}>
         <Package size={18} /> Manage Items
+      </Link>
+      <Link to="/admin/rentals" className={`btn ${path.includes('/admin/rentals') ? 'btn-primary' : 'btn-outline'} flex items-center gap-2`}>
+        <RefreshCw size={18} /> Manage Bookings
       </Link>
     </div>
   );

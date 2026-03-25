@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
 import { Search, Filter } from 'lucide-react';
+import { getImageUrl } from '../utils/imageUtils';
 
 const Items = () => {
   const [items, setItems] = useState([]);
@@ -99,7 +100,7 @@ const Items = () => {
           {items.map(item => (
             <div key={item._id} className="card p-0 overflow-hidden flex flex-col">
               <Link to={`/item/${item._id}`} style={{ display: 'block' }}>
-                <div style={{ height: '180px', backgroundColor: '#e2e8f0', backgroundImage: `url(http://localhost:5000/uploads/${item.imageFilename})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                <div style={{ height: '180px', backgroundColor: '#e2e8f0', backgroundImage: `url(${getImageUrl(item.imageFilename)})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
                   {!item.imageFilename && <div className="w-full h-full flex items-center justify-center text-muted">No Image</div>}
                 </div>
               </Link>

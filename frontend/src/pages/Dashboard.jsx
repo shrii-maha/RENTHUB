@@ -2,7 +2,8 @@ import { useState, useEffect, useContext } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import api from '../api/axios';
-import { Settings, Package, DollarSign, List, Edit, Check, X, Trash2, Download } from 'lucide-react';
+import { Settings, Package, DollarSign, List, Edit, Check, X, Trash2, Download, ShieldCheck } from 'lucide-react';
+import { getImageUrl } from '../utils/imageUtils';
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
@@ -38,8 +39,12 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (user && !user.isAdmin) {
-      fetchDashboardData();
+    if (user) {
+      if (user.isAdmin) {
+        setLoading(false);
+      } else {
+        fetchDashboardData();
+      }
     }
   }, [user]);
 
@@ -78,13 +83,24 @@ const Dashboard = () => {
       }
     }
   };
-
   const handleRentalAction = async (id, action) => {
     try {
       await api.patch(`/rentals/${id}/${action}`);
       fetchDashboardData();
     } catch (err) {
       alert(err.response?.data?.error || `Error ${action} rental`);
+    }
+  };
+
+  const refundDeposit = async (id) => {
+    if (window.confirm('Refund security deposit for this rental?')) {
+      try {
+        await api.patch(`/rentals/${id}/refund-deposit`);
+        alert('Deposit refunded successfully!');
+        fetchDashboardData();
+      } catch (err) {
+        alert(err.response?.data?.error || 'Error refunding deposit');
+      }
     }
   };
 
@@ -95,7 +111,10 @@ const Dashboard = () => {
     <div className="fade-in py-4">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 style={{ marginBottom: 0 }}>Dashboard</h1>
+          <h1 style={{ marginBottom: 0 }} className="flex items-center gap-2">
+            Dashboard 
+            {user.isVerified && <ShieldCheck size={28} className="text-emerald-500" title="Verified User" />}
+          </h1>
           <p className="text-muted">Welcome back, {user.fullName}</p>
         </div>
         <Link to="/add-item" className="btn btn-primary"><Package size={18} /> Add New Item</Link>
@@ -199,8 +218,9 @@ const Dashboard = () => {
                 <th className="py-2">Item</th>
                 <th className="py-2">Renter</th>
                 <th className="py-2">Total Price</th>
+                <th className="py-2">Deposit Status</th>
                 <th className="py-2">Status</th>
-                <th className="py-2">Invoice</th>
+                <th className="py-2">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -212,16 +232,30 @@ const Dashboard = () => {
                     <div className="text-sm font-bold">{deal.renter?.fullName}</div>
                     <div className="text-xs text-muted">{deal.renter?.email}</div>
                   </td>
-                  <td className="py-3">₹{deal.totalPrice}</td>
+                  <td className="py-3">₹{deal.totalPrice} <span className="text-xs text-muted block">+ ₹{deal.depositAmount || 0} deposit</span></td>
+                  <td className="py-3">
+                    <span className={`badge ${deal.depositStatus === 'Refunded' ? 'badge-success' : 'badge-warning'}`}>
+                      {deal.depositStatus}
+                    </span>
+                  </td>
                   <td className="py-3">
                     <span className={`badge ${deal.status === 'Active' ? 'badge-success' : 'badge-info'}`}>
                       {deal.status}
                     </span>
                   </td>
-                  <td className="py-3">
+                  <td className="py-3 flex flex-col gap-1">
                     <Link to={`/invoice/${deal._id}`} className="btn btn-outline text-xs py-1 px-2 flex items-center justify-center gap-1" style={{ minWidth: '100px' }}>
                       <Download size={12} /> Bill
                     </Link>
+                    {deal.depositStatus === 'Held' && (
+                      <button 
+                        onClick={() => refundDeposit(deal._id)} 
+                        className="btn btn-secondary text-xs py-1 px-2"
+                        style={{ minWidth: '100px' }}
+                      >
+                        Refund Deposit
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -250,7 +284,7 @@ const Dashboard = () => {
               {data.myItems.map(item => (
                 <tr key={item._id} className="border-b">
                   <td className="py-3">
-                    <img src={item.imageFilename ? `http://localhost:5000/uploads/${item.imageFilename}` : 'https://via.placeholder.com/50'} alt={item.name} className="object-cover rounded" style={{ width: '50px', height: '50px' }} />
+                    <img src={getImageUrl(item.imageFilename) || 'https://via.placeholder.com/50'} alt={item.name} className="object-cover rounded" style={{ width: '50px', height: '50px' }} />
                   </td>
                   <td className="py-3 font-medium"><Link to={`/item/${item._id}`}>{item.name}</Link></td>
                   <td className="py-3 capitalize">{item.category}</td>

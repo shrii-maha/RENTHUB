@@ -22,6 +22,15 @@ const RentalSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  depositAmount: {
+    type: Number,
+    required: true
+  },
+  depositStatus: {
+    type: String,
+    enum: ['Held', 'Refunded'],
+    default: 'Held'
+  },
   status: {
     type: String,
     enum: ['Pending', 'Approved', 'Rejected', 'Active', 'Completed'],

@@ -16,7 +16,8 @@ const connectDB = async () => {
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`Error: ${error.message}`);
-    process.exit(1);
+    console.warn('Backend server will continue to run without database connection. Features will be limited.');
+    // process.exit(1);
   }
 };
 connectDB();
@@ -24,15 +25,21 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(helmet());
-app.use(cors());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100 // limit each IP to 100 requests per windowMs
 });
-app.use('/api', limiter);
+// app.use('/api', limiter);
 // Raw body needed for Stripe webhook
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
