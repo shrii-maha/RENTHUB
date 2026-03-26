@@ -1,12 +1,12 @@
 import { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
+import ThemeContext from '../context/ThemeContext';
 import { Package, Menu, X, User as UserIcon, LogOut, Sun, Moon } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme } = useContext(ThemeContext);
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -21,7 +21,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="navbar" style={{ backgroundColor: 'var(--nav-bg)' }}>
+    <header className="navbar">
       <div className="container nav-container">
         <Link to="/" className="nav-brand">
           <Package size={28} />
@@ -34,6 +34,15 @@ const Navbar = () => {
           <Link to="/items" className="nav-link">Browse Items</Link>
           <Link to="/about" className="nav-link">About</Link>
           <Link to="/contact" className="nav-link">Contact</Link>
+
+          <button 
+            onClick={toggleTheme} 
+            className="btn btn-outline" 
+            style={{ padding: '0.5rem', borderRadius: '50%', minWidth: '40px', height: '40px' }}
+            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+          </button>
 
           {user ? (
             <>
@@ -58,16 +67,6 @@ const Navbar = () => {
               <Link to="/register" className="btn btn-primary">Sign Up</Link>
             </>
           )}
-
-          {/* Theme Toggle Button */}
-          <button 
-            onClick={toggleTheme} 
-            className="btn btn-outline" 
-            style={{ padding: '0.5rem', borderRadius: '50%', width: '40px', height: '40px' }}
-            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-          >
-            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-          </button>
         </nav>
 
         {/* Mobile menu button */}
@@ -80,7 +79,7 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="mobile-nav" style={{
           position: 'absolute', top: '80px', left: 0, right: 0, 
-          background: 'var(--nav-bg)', backdropFilter: 'blur(16px)', 
+          background: 'var(--card-bg)', backdropFilter: 'blur(16px)', 
           borderBottom: 'var(--glass-border)', padding: '1rem',
           display: 'flex', flexDirection: 'column', gap: '1rem',
           boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
@@ -88,6 +87,17 @@ const Navbar = () => {
           <Link to="/" className="nav-link" onClick={toggleMenu}>Home</Link>
           <Link to="/items" className="nav-link" onClick={toggleMenu}>Browse Items</Link>
           
+          <div className="flex items-center justify-between border-t border-b py-2 my-1" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
+            <span className="text-sm font-medium">Appearance</span>
+            <button 
+              onClick={toggleTheme} 
+              className="btn btn-outline" 
+              style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+            >
+              {theme === 'dark' ? <><Sun size={16} /> Light</> : <><Moon size={16} /> Dark</>}
+            </button>
+          </div>
+
           {user ? (
             <>
               {user.isAdmin ? (

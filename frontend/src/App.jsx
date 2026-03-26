@@ -1,5 +1,6 @@
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Items from './pages/Items';
@@ -25,8 +26,6 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminItems from './pages/admin/AdminItems';
 import AdminRentals from './pages/admin/AdminRentals';
 import AdminEditItem from './pages/admin/AdminEditItem';
-
-import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
   return (
@@ -68,7 +67,7 @@ function App() {
                 <Route path="/admin/items/edit/:id" element={<AdminEditItem />} />
               </Routes>
             </main>
-            <footer className="bg-dark text-white text-center p-4 mt-auto" style={{ backgroundColor: 'var(--footer-bg)' }}>
+            <footer className="bg-dark text-white text-center p-4 mt-auto">
               <p>&copy; {new Date().getFullYear()} RentHub. All rights reserved.</p>
             </footer>
           </div>
