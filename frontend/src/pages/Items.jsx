@@ -251,17 +251,24 @@ const Items = () => {
                   style={{ border: 'none', background: 'white', borderBottom: '4px solid transparent' }}
                 >
                   <Link to={`/item/${item._id}`} style={{ display: 'block' }} className="relative overflow-hidden aspect-video">
-                    <div 
-                      className="w-full h-full transform transition-transform duration-700 group-hover:scale-110"
-                      style={{ 
-                        backgroundColor: '#f1f5f9', 
-                        backgroundImage: `url("${getImageUrl(item.imageFilename)}")`, 
-                        backgroundSize: 'cover', 
-                        backgroundPosition: 'center',
-                        height: '200px'
+                    <div
+                      className="w-full h-full flex items-center justify-center"
+                      style={{
+                        backgroundColor: '#f8faff',
+                        height: '200px',
+                        padding: '0.5rem'
                       }}
                     >
-                      {!item.imageFilename && <div className="w-full h-full flex items-center justify-center text-slate-300 uppercase text-xs font-bold">No Preview</div>}
+                      {item.imageFilename ? (
+                        <img
+                          src={getImageUrl(item.imageFilename)}
+                          alt={item.name}
+                          style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', transition: 'transform 0.7s ease' }}
+                          className="group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-300 uppercase text-xs font-bold">No Preview</div>
+                      )}
                     </div>
                   </Link>
                   <div className="p-5 flex-grow flex flex-col">

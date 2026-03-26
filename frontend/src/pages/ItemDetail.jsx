@@ -86,9 +86,13 @@ const ItemDetail = () => {
         {/* Left Col - Image & Details */}
         <div className="flex flex-col gap-6">
           <div className="card p-0 overflow-hidden" style={{ borderRadius: '16px' }}>
-            <div style={{ height: '400px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ height: '400px', backgroundColor: '#f8faff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
               {item.imageFilename ? (
-                <img src={getImageUrl(item.imageFilename)} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img
+                  src={getImageUrl(item.imageFilename)}
+                  alt={item.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }}
+                />
               ) : (
                 <span className="text-muted text-lg flex items-center gap-2"><Package size={24}/> No Image Provided</span>
               )}
