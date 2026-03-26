@@ -8,12 +8,13 @@ exports.verified = async (req, res, next) => {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
 
-    if (!user.isVerified) {
-      return res.status(403).json({
-        success: false,
-        error: 'Please verify your email address to access this feature'
-      });
-    }
+    // Disabled email verification requirement
+    // if (!user.isVerified) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     error: 'Please verify your email address to access this feature'
+    //   });
+    // }
 
     next();
   } catch (err) {

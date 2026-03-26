@@ -75,11 +75,11 @@ router.post('/register', async (req, res) => {
     });
 
     // Send Email OTP
-    await sendEmail({
-      email: user.email,
-      subject: 'RentHub Email Verification Code',
-      message: `Welcome to RentHub! Your verification code is: ${otpCode}. Valid for 10 minutes.`
-    });
+    // await sendEmail({
+    //   email: user.email,
+    //   subject: 'RentHub Email Verification Code',
+    //   message: `Welcome to RentHub! Your verification code is: ${otpCode}. Valid for 10 minutes.`
+    // });
 
     sendTokenResponse(user, 201, res);
   } catch (error) {
