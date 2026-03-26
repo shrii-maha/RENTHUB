@@ -5,6 +5,7 @@ const Rental = require('../models/Rental');
 const Review = require('../models/Review');
 const { protect } = require('../middleware/auth');
 const upload = require('../middleware/upload');
+const { processUpload } = require('../middleware/upload');
 
 // @desc    Get all available items (with search & filtering)
 // @route   GET /api/items
@@ -119,7 +120,7 @@ router.get('/:id', async (req, res) => {
 // @desc    Create new item
 // @route   POST /api/items
 // @access  Private
-router.post('/', protect, upload.single('image'), async (req, res) => {
+router.post('/', protect, upload.single('image'), processUpload, async (req, res) => {
   try {
     req.body.owner = req.user.id;
     
@@ -128,8 +129,8 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
     }
     
     if (req.file) {
-      // Cloudinary returns full URL in req.file.path; local disk gives just filename
-      req.body.imageFilename = req.file.path || req.file.filename;
+      // Use Cloudinary URL if available, otherwise use local filename
+      req.body.imageFilename = req.file.cloudinaryUrl || req.file.filename || '';
     }
 
     // Convert string 'true'/'false' to boolean if needed
@@ -203,7 +204,7 @@ router.patch('/:id/toggle', protect, async (req, res) => {
 // @desc    Update item
 // @route   PUT /api/items/:id
 // @access  Private
-router.put('/:id', protect, upload.single('image'), async (req, res) => {
+router.put('/:id', protect, upload.single('image'), processUpload, async (req, res) => {
   try {
     let item = await Item.findById(req.params.id);
 
@@ -223,7 +224,7 @@ router.put('/:id', protect, upload.single('image'), async (req, res) => {
 
     // Handle new image upload
     if (req.file) {
-      req.body.imageFilename = req.file.path || req.file.filename;
+      req.body.imageFilename = req.file.cloudinaryUrl || req.file.filename || '';
     }
 
     // Convert string 'true'/'false' to boolean if needed
