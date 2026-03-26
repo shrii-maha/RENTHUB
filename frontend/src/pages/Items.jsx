@@ -76,29 +76,48 @@ const Items = () => {
         <h1>Browse Items</h1>
       </div>
 
-      <div className="card mb-8">
-        <form onSubmit={handleSearch} className="flex gap-4 flex-wrap items-end">
-          <div className="flex-grow min-w-[300px]">
-            <label className="form-label text-sm">Search</label>
-            <div className="relative">
+      {/* ── Search Bar ── */}
+      <div className="card mb-6" style={{ padding: '1rem 1.25rem' }}>
+        <form onSubmit={handleSearch}>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+
+            {/* Search Input — takes all remaining space */}
+            <div style={{ flex: 1, position: 'relative' }}>
+              <Search
+                size={16}
+                style={{
+                  position: 'absolute', left: '0.9rem',
+                  top: '50%', transform: 'translateY(-50%)',
+                  color: 'var(--text-muted)', pointerEvents: 'none'
+                }}
+              />
               <input
                 type="text"
                 placeholder="Search items by name..."
                 className="form-control"
-                style={{ paddingLeft: '2.75rem' }}
+                style={{ paddingLeft: '2.5rem', height: '44px', borderRadius: '10px', marginBottom: 0 }}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
               />
-              <Search className="absolute text-muted" style={{ left: '1rem', top: '50%', transform: 'translateY(-50%)' }} size={18} />
             </div>
-          </div>
 
-          <div className="min-w-[200px]">
-            <label className="form-label text-sm">Category</label>
-            <div className="relative">
+            {/* Category Dropdown — fixed width */}
+            <div style={{ width: '180px', flexShrink: 0, position: 'relative' }}>
+              <Filter
+                size={15}
+                style={{
+                  position: 'absolute', left: '0.9rem',
+                  top: '50%', transform: 'translateY(-50%)',
+                  color: 'var(--text-muted)', pointerEvents: 'none', zIndex: 1
+                }}
+              />
               <select
                 className="form-control"
-                style={{ paddingLeft: '2.75rem', appearance: 'none' }}
+                style={{
+                  paddingLeft: '2.5rem', height: '44px',
+                  borderRadius: '10px', appearance: 'none',
+                  cursor: 'pointer', marginBottom: 0
+                }}
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               >
@@ -109,27 +128,38 @@ const Items = () => {
                 <option value="party">Party Supplies</option>
                 <option value="other">Other</option>
               </select>
-              <Filter className="absolute text-muted" style={{ left: '1rem', top: '50%', transform: 'translateY(-50%)' }} size={18} />
             </div>
-          </div>
 
-          <button type="submit" className="btn btn-primary" style={{ padding: '0.75rem 2rem' }}>
-            <Search size={18} /> Search
-          </button>
+            {/* Search Button */}
+            <button
+              type="submit"
+              className="btn btn-primary"
+              style={{ height: '44px', minWidth: '110px', borderRadius: '10px', flexShrink: 0 }}
+            >
+              <Search size={16} /> Search
+            </button>
+          </div>
         </form>
       </div>
 
       {/* Category Pills */}
-      <div className="flex flex-wrap gap-2 mb-8 justify-center">
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '2rem', justifyContent: 'center' }}>
         {['All', 'Electronics', 'Vehicles', 'Tools', 'Party', 'Other'].map(cat => (
           <button
             key={cat}
             onClick={() => setCategory(cat)}
-            className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 transform active:scale-95 ${
-              category.toLowerCase() === cat.toLowerCase() 
-              ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' 
-              : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100 hover:border-slate-300'
-            }`}
+            style={{
+              padding: '0.4rem 1.2rem',
+              borderRadius: '9999px',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              cursor: 'pointer',
+              border: category.toLowerCase() === cat.toLowerCase() ? 'none' : '1px solid rgba(0,0,0,0.1)',
+              background: category.toLowerCase() === cat.toLowerCase() ? 'var(--primary)' : 'transparent',
+              color: category.toLowerCase() === cat.toLowerCase() ? 'white' : 'var(--text-muted)',
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap'
+            }}
           >
             {cat}
           </button>

@@ -128,7 +128,8 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
     }
     
     if (req.file) {
-      req.body.imageFilename = req.file.filename;
+      // Cloudinary returns full URL in req.file.path; local disk gives just filename
+      req.body.imageFilename = req.file.path || req.file.filename;
     }
 
     // Convert string 'true'/'false' to boolean if needed
@@ -222,8 +223,7 @@ router.put('/:id', protect, upload.single('image'), async (req, res) => {
 
     // Handle new image upload
     if (req.file) {
-      // (Optional) Delete old image here if you want to save space
-      req.body.imageFilename = req.file.filename;
+      req.body.imageFilename = req.file.path || req.file.filename;
     }
 
     // Convert string 'true'/'false' to boolean if needed
