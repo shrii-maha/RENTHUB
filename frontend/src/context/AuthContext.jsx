@@ -8,24 +8,28 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if token exists in local storage
-    const token = localStorage.getItem('token');
-    if (token) {
-      // Validate token and get user data
-      api.get('/auth/me')
-        .then(res => {
-          setUser(res.data.data);
-          setLoading(false);
-        })
-        .catch((err) => {
-          if (err.response && err.response.status === 401) {
-            localStorage.removeItem('token');
-          }
-          setLoading(false);
-        });
-    } else {
-      setLoading(false);
-    }
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await api.get('/auth/me');
+        setUser(res.data.data);
+      } catch (err) {
+        console.error('Initial auth check failed:', err.message);
+        if (err.response && err.response.status === 401) {
+          localStorage.removeItem('token');
+        }
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   const login = async (email, password, isAdminLogin = false) => {

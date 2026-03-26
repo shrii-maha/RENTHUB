@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Item = require('../models/Item');
-const Rental = require('../models/Rental');
 const Review = require('../models/Review');
 const { protect, adminOnly } = require('../middleware/auth');
+const upload = require('../middleware/upload');
 
 // Apply middleware to all admin routes
 router.use(protect);
@@ -162,8 +162,22 @@ router.patch('/rentals/:id/status', async (req, res) => {
 // @desc    Update any item
 // @route   PUT /api/admin/items/:id
 // @access  Private/Admin
-router.put('/items/:id', async (req, res) => {
+router.put('/items/:id', upload.single('image'), async (req, res) => {
   try {
+    // Handle category case
+    if (req.body.category) {
+      req.body.category = req.body.category.toLowerCase();
+    }
+
+    // Handle image upload
+    if (req.file) {
+      req.body.imageFilename = req.file.filename;
+    }
+
+    // Convert string 'true'/'false' to boolean if needed
+    if (req.body.isAvailable === 'false') req.body.isAvailable = false;
+    else if (req.body.isAvailable === 'true') req.body.isAvailable = true;
+
     const item = await Item.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true

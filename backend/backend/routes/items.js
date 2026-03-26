@@ -105,13 +105,18 @@ router.post('/', protect, verified, upload.single('image'), async (req, res) => 
   try {
     req.body.owner = req.user.id;
     
+    if (req.body.category) {
+      req.body.category = req.body.category.toLowerCase();
+    }
+    
     if (req.file) {
       req.body.imageFilename = req.file.filename;
     }
 
     // Convert string 'true'/'false' to boolean if needed
     if (req.body.isAvailable === 'false') req.body.isAvailable = false;
-    else req.body.isAvailable = true;
+    else if (req.body.isAvailable === 'true') req.body.isAvailable = true;
+    else req.body.isAvailable = true; // Default to true if not provided as string or boolean
 
     const item = await Item.create(req.body);
 
@@ -171,6 +176,51 @@ router.patch('/:id/toggle', protect, async (req, res) => {
     await item.save();
 
     res.status(200).json({ success: true, data: item });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// @desc    Update item
+// @route   PUT /api/items/:id
+// @access  Private
+router.put('/:id', protect, verified, upload.single('image'), async (req, res) => {
+  try {
+    let item = await Item.findById(req.params.id);
+
+    if (!item) {
+      return res.status(404).json({ success: false, error: 'Item not found' });
+    }
+
+    // Make sure user is item owner OR admin
+    if (item.owner.toString() !== req.user.id && !req.user.isAdmin) {
+      return res.status(401).json({ success: false, error: 'Not authorized to update this item' });
+    }
+
+    // Lowercase category if provided
+    if (req.body.category) {
+      req.body.category = req.body.category.toLowerCase();
+    }
+
+    // Handle new image upload
+    if (req.file) {
+      // (Optional) Delete old image here if you want to save space
+      req.body.imageFilename = req.file.filename;
+    }
+
+    // Convert string 'true'/'false' to boolean if needed
+    if (req.body.isAvailable === 'false') req.body.isAvailable = false;
+    else if (req.body.isAvailable === 'true') req.body.isAvailable = true;
+
+    item = await Item.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
+    });
+
+    res.status(200).json({
+      success: true,
+      data: item
+    });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }

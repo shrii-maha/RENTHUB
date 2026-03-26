@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import api from '../api/axios';
-import { Settings, Package, DollarSign, List, Edit, Check, X, Trash2, Download, ShieldCheck } from 'lucide-react';
+import { Settings, Package, DollarSign, List, Edit, Check, X, Trash2, Download, ShieldCheck, RefreshCw } from 'lucide-react';
 import { getImageUrl } from '../utils/imageUtils';
 
 const Dashboard = () => {
@@ -295,8 +295,11 @@ const Dashboard = () => {
                     </span>
                   </td>
                   <td className="py-3 flex gap-2">
-                    <button onClick={() => toggleAvailability(item._id)} className="btn btn-outline" style={{ padding: '0.25rem 0.5rem' }} title="Toggle Availability">
+                    <Link to={`/edit-item/${item._id}`} className="btn btn-outline" style={{ padding: '0.25rem 0.5rem' }} title="Edit Details">
                       <Edit size={16} />
+                    </Link>
+                    <button onClick={() => toggleAvailability(item._id)} className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem' }} title="Toggle Availability">
+                      <RefreshCw size={16} />
                     </button>
                     <button onClick={() => deleteItem(item._id)} className="btn btn-danger" style={{ padding: '0.25rem 0.5rem' }} title="Delete">
                       <Trash2 size={16} />

@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import AddItem from './pages/AddItem';
 import MyRentals from './pages/MyRentals';
+import EditItem from './pages/EditItem';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Invoice from './pages/Invoice';
@@ -51,6 +52,7 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/add-item" element={<AddItem />} />
               <Route path="/my-rentals" element={<MyRentals />} />
+              <Route path="/edit-item/:id" element={<EditItem />} />
               <Route path="/invoice/:id" element={<Invoice />} />
               <Route path="/payment-success/:rentalId" element={<PaymentSuccess />} />
               

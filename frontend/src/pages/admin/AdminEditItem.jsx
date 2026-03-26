@@ -17,6 +17,8 @@ const AdminEditItem = () => {
     depositAmount: '',
     isAvailable: true
   });
+  const [imageFile, setImageFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -54,13 +56,32 @@ const AdminEditItem = () => {
     }));
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setError('');
 
+    const data = new FormData();
+    data.append('name', formData.name);
+    data.append('description', formData.description);
+    data.append('category', formData.category);
+    data.append('rentalPrice', formData.rentalPrice);
+    data.append('depositAmount', formData.depositAmount);
+    data.append('isAvailable', formData.isAvailable);
+    if (imageFile) {
+      data.append('image', imageFile);
+    }
+
     try {
-      await api.put(`/admin/items/${id}`, formData);
+      await api.put(`/admin/items/${id}`, data);
       navigate('/admin/items');
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to update item');
@@ -175,6 +196,33 @@ const AdminEditItem = () => {
               onChange={handleChange}
               required
             ></textarea>
+          </div>
+
+          <div className="form-group pb-4">
+            <label className="form-label">Product Image</label>
+            <div className="flex items-center gap-4 mt-2">
+              <div className="w-24 h-24 rounded-lg bg-slate-100 border-2 border-dashed flex items-center justify-center overflow-hidden">
+                {previewUrl ? (
+                  <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="text-muted text-[10px] text-center px-1">Current/None</div>
+                )}
+              </div>
+              <div className="flex-grow">
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="block w-full text-sm text-slate-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-full file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-primary/10 file:text-primary
+                    hover:file:bg-primary/20 cursor-pointer"
+                />
+                <p className="text-[10px] text-muted mt-1">Recommended: 800x600px. Pick a new file to replace the current image.</p>
+              </div>
+            </div>
           </div>
 
           <div className="pt-4 border-t flex gap-4">
