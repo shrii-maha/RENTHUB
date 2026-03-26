@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Items from './pages/Items';
@@ -61,6 +62,7 @@ function App() {
             <p>&copy; {new Date().getFullYear()} RentHub. All rights reserved.</p>
           </footer>
         </div>
+        <SpeedInsights />
       </Router>
     </AuthProvider>
   );
