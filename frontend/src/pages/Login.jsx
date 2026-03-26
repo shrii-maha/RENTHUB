@@ -61,9 +61,16 @@ const Login = () => {
               required 
             />
           </div>
-          <button type="submit" className="btn btn-primary btn-block mt-4" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
+          
+          <div className="flex justify-end mb-4">
+            <Link to="/forgot-password" className="text-secondary text-sm font-medium hover:underline">Forgot Password?</Link>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <button type="submit" className="btn btn-primary btn-block text-lg py-3" disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign In'}
+            </button>
+          </div>
         </form>
 
         <p className="text-center mt-6 text-muted">

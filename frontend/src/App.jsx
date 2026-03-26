@@ -14,6 +14,8 @@ import Contact from './pages/Contact';
 import Invoice from './pages/Invoice';
 import PaymentSuccess from './pages/PaymentSuccess';
 import VerifyEmail from './pages/VerifyEmail';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 // Admin Pages
 import AdminLogin from './pages/admin/AdminLogin';
@@ -41,6 +43,8 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               
               {/* Protected User Routes */}
               <Route path="/dashboard" element={<Dashboard />} />

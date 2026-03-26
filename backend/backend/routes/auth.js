@@ -269,4 +269,72 @@ router.post('/resend-otp', protect, async (req, res) => {
   }
 });
 
+// @desc    Forgot Password
+// @route   POST /api/auth/forgot-password
+// @access  Public
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'There is no user with that email' });
+    }
+
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    user.otpCode = otpCode;
+    user.otpExpires = otpExpires;
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({ success: true, message: 'OTP verification sent to your email.' });
+
+    // Send email asynchronously to prevent timeouts
+    sendEmail({
+      email: user.email,
+      subject: 'RentHub Password Reset OTP',
+      message: `Your RentHub password reset code is: ${otpCode}. It is valid for 10 minutes.`
+    }).catch(console.error);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'Server error processing request' });
+  }
+});
+
+// @desc    Reset Password
+// @route   POST /api/auth/reset-password
+// @access  Public
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ success: false, error: 'Password must be at least 6 characters' });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    if (!user.otpCode || user.otpCode !== otp.trim() || user.otpExpires < Date.now()) {
+      return res.status(400).json({ success: false, error: 'Invalid or expired OTP code' });
+    }
+
+    // Set new password (the pre-save hook in User model will hash it)
+    user.password = newPassword;
+    user.otpCode = undefined;
+    user.otpExpires = undefined;
+    await user.save();
+
+    res.status(200).json({ success: true, message: 'Password updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'Server error resetting password' });
+  }
+});
+
 module.exports = router;
