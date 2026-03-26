@@ -9,63 +9,51 @@ if (process.env.CLOUDINARY_CLOUD_NAME) {
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
   });
-  console.log('[UPLOAD] Cloudinary configured for cloud:', process.env.CLOUDINARY_CLOUD_NAME);
+  console.log('[UPLOAD] Cloudinary configured ✓ cloud:', process.env.CLOUDINARY_CLOUD_NAME);
 }
 
-// Use memory storage — hold file in RAM, then upload to Cloudinary
-const storage = multer.memoryStorage();
-
-// Check file type
-function checkFileType(file, cb) {
-  const allowed = /jpeg|jpg|png|webp/;
-  const extname = allowed.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = allowed.test(file.mimetype);
-  if (mimetype && extname) {
-    return cb(null, true);
-  } else {
-    cb(new Error('Only image files (jpg, jpeg, png, webp) are allowed'));
-  }
-}
-
-// Base multer middleware (puts file in req.file.buffer)
+// Use memory storage — buffer held in RAM, then sent to Cloudinary
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 16 * 1024 * 1024 }, // 16MB
-  fileFilter: (req, file, cb) => checkFileType(file, cb)
+  fileFilter: (req, file, cb) => {
+    const allowed = /jpeg|jpg|png|webp/;
+    const ok = allowed.test(path.extname(file.originalname).toLowerCase()) &&
+                allowed.test(file.mimetype);
+    if (ok) cb(null, true);
+    else cb(new Error('Only image files (jpg, jpeg, png, webp) are allowed'));
+  }
 });
 
-// Helper: upload buffer to Cloudinary and return secure URL
-const uploadToCloudinary = (buffer, originalname) => {
-  return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        folder: 'renthub',
-        resource_type: 'image',
-        transformation: [{ width: 1200, crop: 'limit', quality: 'auto' }]
-      },
-      (error, result) => {
-        if (error) return reject(error);
-        resolve(result.secure_url);
-      }
-    );
-    stream.end(buffer);
-  });
-};
-
-// Middleware factory: multer + optional Cloudinary upload
-// Usage in routes: upload.single('image') — then call processUpload(req, res) if needed
+// Middleware: after multer, push buffer → Cloudinary via base64 (most reliable method)
 const processUpload = async (req, res, next) => {
   try {
-    if (req.file && process.env.CLOUDINARY_CLOUD_NAME) {
-      // Upload buffer to Cloudinary
-      const url = await uploadToCloudinary(req.file.buffer, req.file.originalname);
-      req.file.cloudinaryUrl = url;
-      console.log('[UPLOAD] Uploaded to Cloudinary:', url);
+    if (!req.file) return next(); // No file attached — skip
+
+    if (process.env.CLOUDINARY_CLOUD_NAME) {
+      // Convert buffer to base64 data URI and upload to Cloudinary
+      const b64 = Buffer.from(req.file.buffer).toString('base64');
+      const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+
+      const result = await cloudinary.uploader.upload(dataURI, {
+        folder: 'renthub',
+        resource_type: 'image',
+        transformation: [{ width: 1200, crop: 'limit', quality: 'auto:good' }]
+      });
+
+      req.file.cloudinaryUrl = result.secure_url;
+      console.log('[UPLOAD] ✓ Uploaded to Cloudinary:', result.secure_url);
+    } else {
+      console.warn('[UPLOAD] Cloudinary not configured — image will not be saved!');
     }
+
     next();
   } catch (err) {
-    console.error('[UPLOAD] Cloudinary upload failed:', err.message);
-    res.status(500).json({ success: false, error: 'Image upload failed. Please try again.' });
+    console.error('[UPLOAD] Cloudinary error:', err.message);
+    return res.status(500).json({
+      success: false,
+      error: `Image upload failed: ${err.message}`
+    });
   }
 };
 

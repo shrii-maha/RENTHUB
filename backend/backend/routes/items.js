@@ -245,4 +245,45 @@ router.put('/:id', protect, upload.single('image'), processUpload, async (req, r
   }
 });
 
+// @desc    Delete item (owner or admin only) + remove image from Cloudinary
+// @route   DELETE /api/items/:id
+// @access  Private
+router.delete('/:id', protect, async (req, res) => {
+  try {
+    const item = await Item.findById(req.params.id);
+
+    if (!item) {
+      return res.status(404).json({ success: false, error: 'Item not found' });
+    }
+
+    // Only owner or admin can delete
+    if (item.owner.toString() !== req.user.id && !req.user.isAdmin) {
+      return res.status(403).json({ success: false, error: 'Not authorised to delete this item' });
+    }
+
+    // Delete image from Cloudinary if it's a Cloudinary URL
+    if (item.imageFilename && item.imageFilename.includes('cloudinary.com')) {
+      try {
+        // Extract public_id from URL: .../renthub/abc123.jpg → renthub/abc123
+        const urlParts = item.imageFilename.split('/');
+        const fileWithExt = urlParts[urlParts.length - 1];
+        const publicId = 'renthub/' + fileWithExt.split('.')[0];
+        const { cloudinary } = require('../middleware/upload');
+        await cloudinary.uploader.destroy(publicId);
+        console.log('[DELETE] Removed from Cloudinary:', publicId);
+      } catch (cloudErr) {
+        console.warn('[DELETE] Could not remove from Cloudinary:', cloudErr.message);
+        // Don't fail the delete just because Cloudinary cleanup failed
+      }
+    }
+
+    await item.deleteOne();
+
+    res.status(200).json({ success: true, message: 'Item deleted successfully' });
+  } catch (error) {
+    console.error('[DELETE ITEM]', error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;
