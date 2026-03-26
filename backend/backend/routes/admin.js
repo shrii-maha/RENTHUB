@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Item = require('../models/Item');
+const Rental = require('../models/Rental');
 const Review = require('../models/Review');
 const { protect, adminOnly } = require('../middleware/auth');
 const upload = require('../middleware/upload');

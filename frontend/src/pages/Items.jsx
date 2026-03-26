@@ -47,46 +47,43 @@ const Items = () => {
         <h1>Browse Items</h1>
       </div>
 
-      <div className="card mb-8">
-        <form onSubmit={handleSearch} className="flex gap-4 flex-wrap items-end">
-          <div className="flex-grow min-w-[300px]">
-            <label className="form-label text-sm">Search</label>
-            <div className="relative">
+      <div className="mb-12 w-full max-w-4xl mx-auto mt-4">
+        <form onSubmit={handleSearch}>
+          <div 
+            className="p-[2px] rounded-full shadow-xl shadow-indigo-500/20"
+            style={{ backgroundImage: 'linear-gradient(to right, #6366f1, #a855f7, #ec4899)' }}
+          >
+            <div className="flex items-center bg-[#0B1121] rounded-full p-1.5 w-full">
+              <button 
+                type="submit" 
+                className="bg-indigo-500 hover:bg-indigo-400 transition-colors rounded-full p-3.5 flex items-center justify-center flex-shrink-0"
+                style={{ width: '48px', height: '48px' }}
+              >
+                <Search className="text-white" size={24} />
+              </button>
               <input 
                 type="text" 
-                placeholder="Search items by name..." 
-                className="form-control"
-                style={{ paddingLeft: '2.75rem' }}
+                placeholder="Search..." 
+                className="bg-transparent border-none outline-none text-white text-lg px-5 flex-grow font-light tracking-wider placeholder:text-slate-400"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
               />
-              <Search className="absolute text-muted" style={{ left: '1rem', top: '50%', transform: 'translateY(-50%)' }} size={18} />
+              <div className="pr-4 pl-2 border-l border-slate-700 hidden sm:block">
+                <select 
+                  className="bg-transparent border-none outline-none text-slate-300 text-sm cursor-pointer hover:text-white transition-colors uppercase tracking-wider font-medium"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                >
+                  <option value="All" className="bg-slate-800 text-white">All Categories</option>
+                  <option value="electronics" className="bg-slate-800 text-white">Electronics</option>
+                  <option value="vehicles" className="bg-slate-800 text-white">Vehicles</option>
+                  <option value="tools" className="bg-slate-800 text-white">Tools</option>
+                  <option value="party" className="bg-slate-800 text-white">Party Supplies</option>
+                  <option value="other" className="bg-slate-800 text-white">Other</option>
+                </select>
+              </div>
             </div>
           </div>
-          
-          <div className="min-w-[200px]">
-            <label className="form-label text-sm">Category</label>
-            <div className="relative">
-              <select 
-                className="form-control" 
-                style={{ paddingLeft: '2.75rem', appearance: 'none' }}
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-              >
-                <option value="All">All Categories</option>
-                <option value="electronics">Electronics</option>
-                <option value="vehicles">Vehicles</option>
-                <option value="tools">Tools</option>
-                <option value="party">Party Supplies</option>
-                <option value="other">Other</option>
-              </select>
-              <Filter className="absolute text-muted" style={{ left: '1rem', top: '50%', transform: 'translateY(-50%)' }} size={18} />
-            </div>
-          </div>
-          
-          <button type="submit" className="btn btn-primary" style={{ padding: '0.75rem 2rem' }}>
-            <Search size={18} /> Search
-          </button>
         </form>
       </div>
 
@@ -102,7 +99,7 @@ const Items = () => {
           {items.map(item => (
             <div key={item._id} className="card p-0 overflow-hidden flex flex-col">
               <Link to={`/item/${item._id}`} style={{ display: 'block' }}>
-                <div style={{ height: '180px', backgroundColor: '#e2e8f0', backgroundImage: `url(${getImageUrl(item.imageFilename)})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                <div style={{ height: '180px', backgroundColor: '#e2e8f0', backgroundImage: `url("${getImageUrl(item.imageFilename)}")`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
                   {!item.imageFilename && <div className="w-full h-full flex items-center justify-center text-muted">No Image</div>}
                 </div>
               </Link>
