@@ -26,51 +26,55 @@ import AdminItems from './pages/admin/AdminItems';
 import AdminRentals from './pages/admin/AdminRentals';
 import AdminEditItem from './pages/admin/AdminEditItem';
 
+import { ThemeProvider } from './context/ThemeContext';
+
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="flex flex-col min-h-screen">
-          <Navbar />
-          <main className="flex-grow container mx-auto px-4 py-8">
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<Home />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/items" element={<Items />} />
-              <Route path="/item/:id" element={<ItemDetail />} />
-              
-              {/* Auth Routes */}
-              <Route path="/register" element={<Register />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/verify-email" element={<VerifyEmail />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              
-              {/* Protected User Routes */}
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/add-item" element={<AddItem />} />
-              <Route path="/my-rentals" element={<MyRentals />} />
-              <Route path="/edit-item/:id" element={<EditItem />} />
-              <Route path="/invoice/:id" element={<Invoice />} />
-              <Route path="/payment-success/:rentalId" element={<PaymentSuccess />} />
-              
-              {/* Admin Routes */}
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/users" element={<AdminUsers />} />
-              <Route path="/admin/items" element={<AdminItems />} />
-              <Route path="/admin/rentals" element={<AdminRentals />} />
-              <Route path="/admin/items/edit/:id" element={<AdminEditItem />} />
-            </Routes>
-          </main>
-          <footer className="bg-dark text-white text-center p-4 mt-auto">
-            <p>&copy; {new Date().getFullYear()} RentHub. All rights reserved.</p>
-          </footer>
-        </div>
-      </Router>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
+          <div className="flex flex-col min-h-screen">
+            <Navbar />
+            <main className="flex-grow container mx-auto px-4 py-8">
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<Home />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/items" element={<Items />} />
+                <Route path="/item/:id" element={<ItemDetail />} />
+                
+                {/* Auth Routes */}
+                <Route path="/register" element={<Register />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                
+                {/* Protected User Routes */}
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/add-item" element={<AddItem />} />
+                <Route path="/my-rentals" element={<MyRentals />} />
+                <Route path="/edit-item/:id" element={<EditItem />} />
+                <Route path="/invoice/:id" element={<Invoice />} />
+                <Route path="/payment-success/:rentalId" element={<PaymentSuccess />} />
+                
+                {/* Admin Routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/users" element={<AdminUsers />} />
+                <Route path="/admin/items" element={<AdminItems />} />
+                <Route path="/admin/rentals" element={<AdminRentals />} />
+                <Route path="/admin/items/edit/:id" element={<AdminEditItem />} />
+              </Routes>
+            </main>
+            <footer className="bg-dark text-white text-center p-4 mt-auto" style={{ backgroundColor: 'var(--footer-bg)' }}>
+              <p>&copy; {new Date().getFullYear()} RentHub. All rights reserved.</p>
+            </footer>
+          </div>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
