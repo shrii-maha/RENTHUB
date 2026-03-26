@@ -23,6 +23,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminItems from './pages/admin/AdminItems';
 import AdminRentals from './pages/admin/AdminRentals';
+import AdminEditItem from './pages/admin/AdminEditItem';
 
 function App() {
   return (
@@ -59,6 +60,7 @@ function App() {
               <Route path="/admin/users" element={<AdminUsers />} />
               <Route path="/admin/items" element={<AdminItems />} />
               <Route path="/admin/rentals" element={<AdminRentals />} />
+              <Route path="/admin/items/edit/:id" element={<AdminEditItem />} />
             </Routes>
           </main>
           <footer className="bg-dark text-white text-center p-4 mt-auto">

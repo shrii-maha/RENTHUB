@@ -18,8 +18,14 @@ const Login = () => {
     setLoading(true);
 
     try {
-      await login(email, password, false);
-      navigate('/dashboard');
+      await login(email, password);
+      
+      // Automatic redirect for Admin if they use normal login
+      if (email.toLowerCase() === 'admin@renthub.com') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');
     } finally {
@@ -73,9 +79,14 @@ const Login = () => {
           </div>
         </form>
 
-        <p className="text-center mt-6 text-muted">
-          Don't have an account? <Link to="/register" className="text-primary font-bold">Sign Up</Link>
-        </p>
+        <div className="text-center mt-6">
+          <p className="text-muted">Don't have an account? <Link to="/register" className="font-bold">Sign Up</Link></p>
+          <div className="mt-8 pt-4 border-t border-slate-100 opacity-50 hover:opacity-100 transition-opacity">
+            <Link to="/admin/login" className="text-xs uppercase tracking-widest text-muted hover:text-primary">
+              Admin Portal
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

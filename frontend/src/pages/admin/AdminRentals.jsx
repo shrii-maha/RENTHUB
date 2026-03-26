@@ -21,6 +21,15 @@ const AdminRentals = () => {
     }
   };
 
+  const handleStatusUpdate = async (id, status) => {
+    try {
+      await api.patch(`/admin/rentals/${id}/status`, { status });
+      fetchRentals();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Error updating status');
+    }
+  };
+
   useEffect(() => {
     if (user && user.isAdmin) {
       fetchRentals();
@@ -76,15 +85,31 @@ const AdminRentals = () => {
                       {r.status}
                     </span>
                   </td>
-                  <td className="py-3 text-center">
-                    <Link 
-                      to={`/invoice/${r._id}`} 
-                      className="btn btn-outline text-xs py-1 px-2 flex items-center justify-center gap-1 mx-auto"
-                      style={{ maxWidth: '100px' }}
-                    >
-                      <Download size={14} /> Bill
-                    </Link>
-                  </td>
+                   <td className="py-3 text-center flex flex-col gap-1 items-center">
+                     {r.status === 'Pending' && (
+                       <div className="flex gap-1 mb-1">
+                         <button 
+                           onClick={() => handleStatusUpdate(r._id, 'Approved')}
+                           className="btn btn-secondary text-xs px-2 py-1"
+                         >
+                           Approve
+                         </button>
+                         <button 
+                           onClick={() => handleStatusUpdate(r._id, 'Rejected')}
+                           className="btn btn-danger text-xs px-2 py-1"
+                         >
+                           Reject
+                         </button>
+                       </div>
+                     )}
+                     <Link 
+                       to={`/invoice/${r._id}`} 
+                       className="btn btn-outline text-xs py-1 px-2 flex items-center justify-center gap-1"
+                       style={{ maxWidth: '80px', width: '100%' }}
+                     >
+                       <Download size={12} /> Bill
+                     </Link>
+                   </td>
                 </tr>
               ))}
             </tbody>

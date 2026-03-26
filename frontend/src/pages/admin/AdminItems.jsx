@@ -3,7 +3,7 @@ import { Navigate, Link } from 'react-router-dom';
 import api from '../../api/axios';
 import AuthContext from '../../context/AuthContext';
 import AdminNav from '../../components/AdminNav';
-import { Trash2, ExternalLink } from 'lucide-react';
+import { Trash2, ExternalLink, Edit } from 'lucide-react';
 
 const AdminItems = () => {
   const { user } = useContext(AuthContext);
@@ -88,6 +88,9 @@ const AdminItems = () => {
                     </span>
                   </td>
                   <td className="py-3 flex gap-2 justify-center">
+                    <Link to={`/admin/items/edit/${i._id}`} className="btn btn-outline" style={{ padding: '0.25rem 0.5rem' }} title="Edit Item">
+                      <Edit size={16} />
+                    </Link>
                     <button onClick={() => handleDelete(i._id)} className="btn btn-danger" style={{ padding: '0.25rem 0.5rem' }} title="Delete Item">
                       <Trash2 size={16} />
                     </button>
