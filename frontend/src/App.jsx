@@ -13,7 +13,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Invoice from './pages/Invoice';
 import PaymentSuccess from './pages/PaymentSuccess';
-import VerifyPhone from './pages/VerifyPhone';
+import VerifyEmail from './pages/VerifyEmail';
 
 // Admin Pages
 import AdminLogin from './pages/admin/AdminLogin';
@@ -40,7 +40,7 @@ function App() {
               {/* Auth Routes */}
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/verify-phone" element={<VerifyPhone />} />
+              <Route path="/verify-email" element={<VerifyEmail />} />
               
               {/* Protected User Routes */}
               <Route path="/dashboard" element={<Dashboard />} />

@@ -11,7 +11,7 @@ exports.verified = async (req, res, next) => {
     if (!user.isVerified) {
       return res.status(403).json({
         success: false,
-        error: 'Please verify your phone number to access this feature'
+        error: 'Please verify your email address to access this feature'
       });
     }
 

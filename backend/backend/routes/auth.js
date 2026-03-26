@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { protect } = require('../middleware/auth');
-const sendSMS = require('../utils/sms');
+const sendEmail = require('../utils/sendEmail');
 const mockDb = require('../utils/mockDb');
 
 // Get token from model, create cookie and send response
@@ -74,8 +74,12 @@ router.post('/register', async (req, res) => {
       otpExpires
     });
 
-    // Send SMS (Simulated if no Twilio keys)
-    await sendSMS(phoneNumber, `Your RentHub verification code is: ${otpCode}. Valid for 10 minutes.`);
+    // Send Email OTP
+    await sendEmail({
+      email: user.email,
+      subject: 'RentHub Email Verification Code',
+      message: `Welcome to RentHub! Your verification code is: ${otpCode}. Valid for 10 minutes.`
+    });
 
     sendTokenResponse(user, 201, res);
   } catch (error) {
@@ -250,7 +254,11 @@ router.post('/resend-otp', protect, async (req, res) => {
     user.otpExpires = otpExpires;
     await user.save();
 
-    await sendSMS(user.phoneNumber, `Your new RentHub verification code is: ${otpCode}. Valid for 10 minutes.`);
+    await sendEmail({
+      email: user.email,
+      subject: 'RentHub New Verification Code',
+      message: `Your new RentHub verification code is: ${otpCode}. Valid for 10 minutes.`
+    });
 
     res.status(200).json({
       success: true,

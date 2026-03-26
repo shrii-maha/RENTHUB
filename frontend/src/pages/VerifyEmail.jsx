@@ -2,9 +2,9 @@ import { useState, useContext, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import api from '../api/axios';
-import { ShieldCheck, Phone, RefreshCw } from 'lucide-react';
+import { ShieldCheck, Mail, RefreshCw } from 'lucide-react';
 
-const VerifyPhone = () => {
+const VerifyEmail = () => {
   const { user, setUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const [otp, setOtp] = useState('');
@@ -30,7 +30,7 @@ const VerifyPhone = () => {
     try {
       const res = await api.post('/auth/verify-otp', { otp });
       setUser({ ...user, isVerified: true });
-      setMessage('Phone verified successfully! Redirecting...');
+      setMessage('Email verified successfully! Redirecting...');
       setTimeout(() => navigate('/dashboard'), 2000);
     } catch (err) {
       setError(err.response?.data?.error || 'Verification failed');
@@ -45,7 +45,7 @@ const VerifyPhone = () => {
 
     try {
       await api.post('/auth/resend-otp');
-      setMessage('A new OTP has been sent to your phone.');
+      setMessage('A new OTP has been sent to your email.');
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to resend OTP');
     } finally {
@@ -60,9 +60,9 @@ const VerifyPhone = () => {
           <ShieldCheck size={32} />
         </div>
         
-        <h1 className="mb-2">Verify Your Phone</h1>
+        <h1 className="mb-2">Verify Your Email</h1>
         <p className="text-muted mb-8">
-          We've sent a 6-digit verification code to <span className="font-bold text-dark">{user.phoneNumber}</span>. 
+          We've sent a 6-digit verification code to <span className="font-bold text-dark">{user.email}</span>. 
           Please enter it below to complete your registration.
         </p>
 
@@ -100,7 +100,7 @@ const VerifyPhone = () => {
             className="btn btn-outline btn-sm flex items-center gap-2 mx-auto"
             disabled={resending || loading}
           >
-            {resending ? <RefreshCw size={16} className="animate-spin" /> : <Phone size={16} />}
+            {resending ? <RefreshCw size={16} className="animate-spin" /> : <Mail size={16} />}
             {resending ? 'Sending...' : 'Resend Code'}
           </button>
         </div>
@@ -113,4 +113,4 @@ const VerifyPhone = () => {
   );
 };
 
-export default VerifyPhone;
+export default VerifyEmail;

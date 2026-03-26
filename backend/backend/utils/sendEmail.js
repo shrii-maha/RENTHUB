@@ -18,9 +18,16 @@ const sendEmail = async (options) => {
     html: options.html,
   };
 
-  const info = await transporter.sendMail(message);
-
-  console.log('Message sent: %s', info.messageId);
+  try {
+    const info = await transporter.sendMail(message);
+    console.log('Message sent: %s', info.messageId);
+  } catch (error) {
+    console.error('Email could not be sent, possibly due to missing credentials. Simulating email instead...');
+    console.log(`=== SIMULATED EMAIL TO: ${options.email} ===`);
+    console.log(`Subject: ${options.subject}`);
+    console.log(`Message: ${options.message}`);
+    console.log(`=================================================`);
+  }
 };
 
 module.exports = sendEmail;
