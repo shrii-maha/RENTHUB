@@ -290,12 +290,18 @@ router.post('/forgot-password', async (req, res) => {
 
     res.status(200).json({ success: true, message: 'OTP verification sent to your email.' });
 
-    // Send email asynchronously to prevent timeouts
+    // Send email asynchronously and log specifically for Render
+    console.log(`[AUTH] Sending Forgot Password OTP to: ${user.email}`);
     sendEmail({
       email: user.email,
       subject: 'RentHub Password Reset OTP',
       message: `Your RentHub password reset code is: ${otpCode}. It is valid for 10 minutes.`
-    }).catch(console.error);
+    }).then(() => {
+      console.log(`[AUTH] Successfully sent Forgot Password OTP to: ${user.email}`);
+    }).catch(emailErr => {
+      console.error(`[AUTH] FAILED to send email to ${user.email}:`, emailErr.message);
+      console.warn('[AUTH] Tip: Ensure EMAIL_PASSWORD is set to a 16-letter App Password in Render.');
+    });
 
   } catch (error) {
     console.error(error);

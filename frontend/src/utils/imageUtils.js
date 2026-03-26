@@ -8,6 +8,13 @@ export const getImageUrl = (imageFilename) => {
     return trimmed;
   }
   
-  // Otherwise, prefix with the backend uploads URL
-  return `http://localhost:5000/uploads/${trimmed}`;
+  // Get base API URL from environment variables
+  // VITE_API_URL is typically: https://renthub-ypl5.onrender.com/api
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  
+  // Remove '/api' from the end to get the BASE backend URL
+  const baseUrl = apiUrl.endsWith('/api') ? apiUrl.slice(0, -4) : apiUrl;
+  
+  // Prefix with the dynamic backend uploads URL
+  return `${baseUrl}/uploads/${trimmed}`;
 };

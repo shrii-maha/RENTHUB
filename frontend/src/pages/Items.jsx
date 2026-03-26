@@ -48,26 +48,28 @@ const Items = () => {
       </div>
 
       <div className="card mb-8">
-        <form onSubmit={handleSearch} className="flex gap-4 flex-wrap">
-          <div className="flex-grow min-w-[300px]" style={{ flexBasis: '50%' }}>
-            <div className="relative h-full">
+        <form onSubmit={handleSearch} className="flex gap-4 flex-wrap items-end">
+          <div className="flex-grow min-w-[300px]">
+            <label className="form-label text-sm">Search</label>
+            <div className="relative">
               <input 
                 type="text" 
                 placeholder="Search items by name..." 
                 className="form-control"
-                style={{ height: '100%', paddingLeft: '2.5rem' }}
+                style={{ paddingLeft: '2.75rem' }}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
               />
-              <Search className="absolute text-muted" style={{ left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} size={20} />
+              <Search className="absolute text-muted" style={{ left: '1rem', top: '50%', transform: 'translateY(-50%)' }} size={18} />
             </div>
           </div>
           
-          <div className="flex-grow min-w-[200px]">
-            <div className="relative h-full">
+          <div className="min-w-[200px]">
+            <label className="form-label text-sm">Category</label>
+            <div className="relative">
               <select 
                 className="form-control" 
-                style={{ height: '100%', paddingLeft: '2.5rem', appearance: 'none' }}
+                style={{ paddingLeft: '2.75rem', appearance: 'none' }}
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               >
@@ -78,12 +80,12 @@ const Items = () => {
                 <option value="party">Party Supplies</option>
                 <option value="other">Other</option>
               </select>
-              <Filter className="absolute text-muted" style={{ left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} size={20} />
+              <Filter className="absolute text-muted" style={{ left: '1rem', top: '50%', transform: 'translateY(-50%)' }} size={18} />
             </div>
           </div>
           
-          <button type="submit" className="btn btn-primary" style={{ padding: '0 2rem' }}>
-            Search
+          <button type="submit" className="btn btn-primary" style={{ padding: '0.75rem 2rem' }}>
+            <Search size={18} /> Search
           </button>
         </form>
       </div>

@@ -77,7 +77,7 @@ const ItemDetail = () => {
   if (!data || !data.item) return <div className="text-center py-12">Item not found.</div>;
 
   const { item, relatedItems } = data;
-  const isOwner = user && user.id === item.owner._id;
+  const isOwner = user && item.owner && user.id === item.owner._id;
 
   return (
     <div className="fade-in py-4 pb-12">
@@ -101,8 +101,8 @@ const ItemDetail = () => {
             
             <div className="mt-6 pt-6 border-t flex flex-wrap gap-4">
               <div className="flex items-center gap-2 text-muted">
-                <ShieldCheck size={20} className={item.owner.isVerified ? "text-emerald-500" : "text-primary"} />
-                <span>{item.owner.isVerified ? 'Verified Owner' : 'Owner'}: {item.owner.fullName}</span>
+                <ShieldCheck size={20} className={item.owner?.isVerified ? "text-emerald-500" : "text-primary"} />
+                <span>{item.owner?.isVerified ? 'Verified Owner' : 'Owner'}: {item.owner?.fullName || 'Unknown Owner'}</span>
               </div>
             </div>
           </div>

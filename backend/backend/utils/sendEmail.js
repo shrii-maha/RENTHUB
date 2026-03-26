@@ -20,9 +20,12 @@ const sendEmail = async (options) => {
 
   try {
     const info = await transporter.sendMail(message);
-    console.log('Message sent: %s', info.messageId);
+    console.log('[EMAIL] SUCCESS: Message sent to %s (ID: %s)', options.email, info.messageId);
   } catch (error) {
-    console.error('Email could not be sent, possibly due to missing credentials. Simulating email instead...');
+    console.error('[EMAIL] CRITICAL ERROR: Could not send email via SMTP.');
+    console.error(`[EMAIL] REASON: ${error.message}`);
+    console.warn('[EMAIL] ACTION REQUIRED: Check if Google App Password is correct in Render Env Vars.');
+    
     console.log(`=== SIMULATED EMAIL TO: ${options.email} ===`);
     console.log(`Subject: ${options.subject}`);
     console.log(`Message: ${options.message}`);
