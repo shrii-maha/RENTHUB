@@ -32,6 +32,9 @@ connectDB();
 
 const app = express();
 
+// Trust reverse proxy (Render, Vercel, Nginx) — fixes rate-limit X-Forwarded-For warning
+app.set('trust proxy', 1);
+
 // ============================================================
 // Security Middleware
 // ============================================================
