@@ -93,55 +93,63 @@ router.post('/success/:rentalId', protect, async (req, res) => {
         populate: { path: 'owner', select: 'fullName email' }
       });
 
-    // Send emails (Try-catch to avoid breaking if email is misconfigured)
-    try {
-      // Email to Renter (Buyer)
-      await sendEmail({
-        email: populatedRental.renter.email,
-        subject: `Payment Successful! Your rental for ${populatedRental.item.name} is now active.`,
-        html: `
-          <h1>Payment Confirmed!</h1>
-          <p>Hi ${populatedRental.renter.fullName},</p>
-          <p>Your payment for <strong>${populatedRental.item.name}</strong> was successful. Your rental is now active.</p>
-          <p>You can view and print your invoice here: <a href="${process.env.CLIENT_URL}/invoice/${populatedRental._id}">${process.env.CLIENT_URL}/invoice/${populatedRental._id}</a></p>
-          <p>Thank you for using RentHub!</p>
-        `
-      });
+    // Send emails in the background (Non-blocking) so the user doesn't wait
+    const sendNotificationEmails = async () => {
+      try {
+        console.log(`Starting background email notifications for rental ${rental._id}...`);
+        
+        // Email to Renter (Buyer)
+        await sendEmail({
+          email: populatedRental.renter.email,
+          subject: `Payment Successful! Your rental for ${populatedRental.item.name} is now active.`,
+          html: `
+            <h1>Payment Confirmed!</h1>
+            <p>Hi ${populatedRental.renter.fullName},</p>
+            <p>Your payment for <strong>${populatedRental.item.name}</strong> was successful. Your rental is now active.</p>
+            <p>You can view and print your invoice here: <a href="${process.env.CLIENT_URL}/invoice/${populatedRental._id}">${process.env.CLIENT_URL}/invoice/${populatedRental._id}</a></p>
+            <p>Thank you for using RentHub!</p>
+          `
+        }).catch(err => console.error('Buyer email failed:', err.message));
 
-      // Email to Owner (Seller)
-      await sendEmail({
-        email: populatedRental.item.owner.email,
-        subject: `Success! Your item "${populatedRental.item.name}" has been rented out.`,
-        html: `
-          <h1>Rental Alert!</h1>
-          <p>Hi ${populatedRental.item.owner.fullName},</p>
-          <p>Great news! Your item <strong>${populatedRental.item.name}</strong> has been successfully rented out to ${populatedRental.renter.fullName}.</p>
-          <p>The deal is successful, and the rental is now active. You can check your dashboard for details.</p>
-        `
-      });
-      
-      // Email to Admin
-      await sendEmail({
-        email: process.env.FROM_EMAIL, // Sending to the configured admin email
-        subject: `ALERT: New Booking on RentHub! - Dealer: ${populatedRental.item.owner.fullName}`,
-        html: `
-          <h1>New Transaction!</h1>
-          <p>A new booking has been completed on the platform.</p>
-          <p><strong>Item:</strong> ${populatedRental.item.name}</p>
-          <p><strong>Renter:</strong> ${populatedRental.renter.fullName} (${populatedRental.renter.email})</p>
-          <p><strong>Owner:</strong> ${populatedRental.item.owner.fullName} (${populatedRental.item.owner.email})</p>
-          <p><strong>Total Price:</strong> ₹${populatedRental.totalPrice}</p>
-          <p><strong>Deposit:</strong> ₹${populatedRental.depositAmount}</p>
-          <p><a href="${process.env.CLIENT_URL}/admin/rentals">Review in Admin Panel</a></p>
-        `
-      });
-      
-      console.log('Notification emails triggered successfully');
-    } catch (emailErr) {
-      console.error('Email sending failed:', emailErr.message);
-      // We don't fail the request if email fails
-    }
+        // Email to Owner (Seller)
+        await sendEmail({
+          email: populatedRental.item.owner.email,
+          subject: `Success! Your item "${populatedRental.item.name}" has been rented out.`,
+          html: `
+            <h1>Rental Alert!</h1>
+            <p>Hi ${populatedRental.item.owner.fullName},</p>
+            <p>Great news! Your item <strong>${populatedRental.item.name}</strong> has been successfully rented out to ${populatedRental.renter.fullName}.</p>
+            <p>The deal is successful, and the rental is now active. You can check your dashboard for details.</p>
+          `
+        }).catch(err => console.error('Seller email failed:', err.message));
+        
+        // Email to Admin
+        const adminEmail = process.env.FROM_EMAIL || 'admin@renthub.com';
+        await sendEmail({
+          email: adminEmail,
+          subject: `ALERT: New Booking on RentHub! - Dealer: ${populatedRental.item.owner.fullName}`,
+          html: `
+            <h1>New Transaction!</h1>
+            <p>A new booking has been completed on the platform.</p>
+            <p><strong>Item:</strong> ${populatedRental.item.name}</p>
+            <p><strong>Renter:</strong> ${populatedRental.renter.fullName} (${populatedRental.renter.email})</p>
+            <p><strong>Owner:</strong> ${populatedRental.item.owner.fullName} (${populatedRental.item.owner.email})</p>
+            <p><strong>Total Price:</strong> ₹${populatedRental.totalPrice}</p>
+            <p><strong>Deposit:</strong> ₹${populatedRental.depositAmount}</p>
+            <p><a href="${process.env.CLIENT_URL}/admin/rentals">Review in Admin Panel</a></p>
+          `
+        }).catch(err => console.error('Admin email failed:', err.message));
+        
+        console.log('Background email notifications completed successfully');
+      } catch (err) {
+        console.error('Critical background email error:', err.message);
+      }
+    };
 
+    // Fire and forget! (Don't await it here)
+    sendNotificationEmails();
+
+    // Instantly return success to the frontend so the Invoice loads immediately
     res.status(200).json({ success: true, data: rental });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
