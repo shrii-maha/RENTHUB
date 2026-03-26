@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import AuthContext from '../context/AuthContext';
-import { Star, ShieldCheck, User } from 'lucide-react';
+import { Star, ShieldCheck, User, Package } from 'lucide-react';
 import { getImageUrl } from '../utils/imageUtils';
 
 const ItemDetail = () => {
