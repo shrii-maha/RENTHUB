@@ -5,8 +5,13 @@ const User = require('../models/User');
 exports.protect = async (req, res, next) => {
   let token;
 
+  // 1. Check Authorization header (Bearer token)
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
+  }
+  // 2. Fallback: Check HttpOnly cookie
+  else if (req.cookies && req.cookies.token) {
+    token = req.cookies.token;
   }
 
   if (!token) {
@@ -15,43 +20,38 @@ exports.protect = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('Token verified for user ID:', decoded.id);
-    
-    if (process.env.ALLOW_MOCK_LOGIN === 'true') {
-      const mockUser = require('../utils/mockDb').findUserById(decoded.id);
-      if (mockUser) {
-        req.user = mockUser;
-        return next();
-      }
-    }
 
-    req.user = await User.findById(decoded.id).maxTimeMS(2000);
-    console.log('User found in middleware:', req.user ? req.user.email : 'None');
-    
+    req.user = await User.findById(decoded.id);
+
     if (!req.user) {
-      return res.status(401).json({ success: false, error: 'User not found' });
+      return res.status(401).json({ success: false, error: 'User no longer exists' });
     }
 
     if (req.user.isBlocked) {
-      console.log('Blocked user attempt:', req.user.email);
-      return res.status(403).json({ success: false, error: 'Your account has been blocked.' });
+      return res.status(403).json({ success: false, error: 'Your account has been suspended. Please contact support.' });
     }
-    
+
     next();
   } catch (err) {
-    console.error('Auth middleware error:', err.message);
-    if (err.name === 'MongooseServerSelectionError' || err.message.includes('connection')) {
-      return res.status(503).json({ success: false, error: 'Database is currently unreachable.' });
+    console.error('[AUTH MIDDLEWARE] Error:', err.message);
+    if (err.name === 'JsonWebTokenError') {
+      return res.status(401).json({ success: false, error: 'Invalid token' });
+    }
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ success: false, error: 'Your session has expired. Please log in again.' });
+    }
+    if (err.name === 'MongooseServerSelectionError' || err.message.includes('buffering timed out')) {
+      return res.status(503).json({ success: false, error: 'Database is temporarily unavailable. Please try again.' });
     }
     return res.status(401).json({ success: false, error: 'Not authorized' });
   }
 };
 
-// Grant access to specific roles (admin)
+// Grant access to admins only
 exports.adminOnly = (req, res, next) => {
   if (req.user && req.user.isAdmin) {
     next();
   } else {
-    return res.status(403).json({ success: false, error: 'User role is not authorized' });
+    return res.status(403).json({ success: false, error: 'Admin access required' });
   }
 };

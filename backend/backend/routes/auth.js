@@ -3,19 +3,27 @@ const router = express.Router();
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { protect } = require('../middleware/auth');
-const mockDb = require('../utils/mockDb');
 
-// Get token from model, create cookie and send response
+// ============================================================
+// HELPER: Create JWT token, set HttpOnly cookie, send response
+// ============================================================
 const sendTokenResponse = (user, statusCode, res) => {
-  // Create token
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
     expiresIn: '30d'
   });
-  
-  // We send the token in json body. The frontend will store it in localStorage
+
+  const cookieOptions = {
+    expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+  };
+
+  res.cookie('token', token, cookieOptions);
+
   res.status(statusCode).json({
     success: true,
-    token,
+    token, // Also send in body for localStorage fallback
     user: {
       id: user._id,
       fullName: user.fullName,
@@ -32,123 +40,155 @@ const sendTokenResponse = (user, statusCode, res) => {
   });
 };
 
+// ============================================================
+// @desc    Get current logged-in user
+// @route   GET /api/auth/me
+// @access  Private
+// ============================================================
+router.get('/me', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// ============================================================
+// @desc    Logout user / clear cookie
+// @route   GET /api/auth/logout
+// @access  Private
+// ============================================================
+router.get('/logout', protect, (req, res) => {
+  res.cookie('token', 'none', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true
+  });
+
+  res.status(200).json({ success: true, message: 'Logged out successfully' });
+});
+
+// ============================================================
 // @desc    Register user
 // @route   POST /api/auth/register
 // @access  Public
+// ============================================================
 router.post('/register', async (req, res) => {
   try {
-    const { fullName, email, phoneNumber, address, password, bankName, accountHolderName, accountNumber, ifscCode } = req.body;
+    const { fullName, email, phoneNumber, address, password } = req.body;
 
-    if (process.env.ALLOW_MOCK_LOGIN === 'true') {
-      const mockUserExists = mockDb.findUserByEmail(email);
-      if (mockUserExists) {
-        return res.status(400).json({ success: false, error: 'User already exists' });
-      }
-      const newMockUser = mockDb.createUser(req.body);
-      return sendTokenResponse(newMockUser, 201, res);
+    // --- Validation ---
+    if (!fullName || !email || !phoneNumber || !address || !password) {
+      return res.status(400).json({ success: false, error: 'Please fill in all required fields' });
     }
 
-    // Check if user exists
-    const userExists = await User.findOne({ email });
+    const emailRegex = /^[\w.-]+@[\w.-]+\.\w{2,}$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ success: false, error: 'Please provide a valid email address' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, error: 'Password must be at least 6 characters' });
+    }
+
+    if (phoneNumber.length < 10) {
+      return res.status(400).json({ success: false, error: 'Please provide a valid phone number' });
+    }
+
+    // --- Check if user already exists ---
+    const userExists = await User.findOne({ email: email.toLowerCase().trim() });
     if (userExists) {
-      return res.status(400).json({ success: false, error: 'User already exists' });
+      return res.status(400).json({ success: false, error: 'An account with this email already exists' });
     }
 
-    // Simply create user — no email verification needed
+    // --- Create user ---
     const user = await User.create({
-      fullName,
-      email,
+      fullName: fullName.trim(),
+      email: email.toLowerCase().trim(),
       phoneNumber,
       address,
       password,
-      bankName,
-      accountHolderName,
-      accountNumber,
-      ifscCode,
-      isVerified: true // Auto-verify all users
+      isVerified: true // Auto-verify: no OTP friction
     });
 
     sendTokenResponse(user, 201, res);
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    console.error('[AUTH] Register error:', error.message);
+    if (error.code === 11000) {
+      return res.status(400).json({ success: false, error: 'An account with this email already exists' });
+    }
+    res.status(500).json({ success: false, error: 'Server error during registration' });
   }
 });
 
+// ============================================================
 // @desc    Login user
 // @route   POST /api/auth/login
 // @access  Public
+// ============================================================
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validate email & password
+    // --- Validation ---
     if (!email || !password) {
-      return res.status(400).json({ success: false, error: 'Please provide an email and password' });
+      return res.status(400).json({ success: false, error: 'Please provide your email and password' });
     }
 
-    try {
-      if (process.env.ALLOW_MOCK_LOGIN === 'true') {
-        const mockUser = mockDb.findUserByEmail(email);
-        if (!mockUser) {
-           return res.status(401).json({ success: false, error: 'Invalid credentials' });
-        }
-        // In mock mode, password is plain text
-        if (mockUser.password !== password) {
-           return res.status(401).json({ success: false, error: 'Invalid credentials' });
-        }
-        return sendTokenResponse(mockUser, 200, res);
-      }
+    // --- Find user and include password field ---
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
 
-      // Check for user
-      const user = await User.findOne({ email }).select('+password').maxTimeMS(2000);
-
-      if (!user) {
-        if (process.env.ALLOW_MOCK_LOGIN === 'true') {
-           return sendTokenResponse({ _id: 'mock_user_id', fullName: 'Development User', email: email, isAdmin: false, isVerified: true }, 200, res);
-        }
-        return res.status(401).json({ success: false, error: 'Invalid credentials' });
-      }
-
-      if (user.isAdmin) {
-        return res.status(401).json({ success: false, error: 'Admin must login via admin route' });
-      }
-
-      // Check if password matches
-      const isMatch = await user.matchPassword(password);
-
-      if (!isMatch) {
-        return res.status(401).json({ success: false, error: 'Invalid credentials' });
-      }
-
-      sendTokenResponse(user, 200, res);
-    } catch (dbError) {
-      if (process.env.ALLOW_MOCK_LOGIN === 'true') {
-        // Fallback to purely mocked dev user if no local user created yet
-        console.warn('Database connection failed, using dev fallback mock login');
-        return sendTokenResponse({ _id: 'mock_user_id', fullName: 'Development User', email: email, isAdmin: false, isVerified: true }, 200, res);
-      }
-      throw dbError;
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: 'No account found with this email. Please sign up first.',
+        shouldSignUp: true  // Frontend can use this flag to redirect
+      });
     }
+
+    // --- Admin check ---
+    if (user.isAdmin) {
+      return res.status(401).json({ success: false, error: 'Admin accounts must use the admin login page' });
+    }
+
+    // --- Blocked user check ---
+    if (user.isBlocked) {
+      return res.status(403).json({ success: false, error: 'Your account has been suspended. Please contact support.' });
+    }
+
+    // --- Password match ---
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, error: 'Incorrect password. Please try again.' });
+    }
+
+    sendTokenResponse(user, 200, res);
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    console.error('[AUTH] Login error:', error.message);
+    res.status(500).json({ success: false, error: 'Server error during login' });
   }
 });
 
+// ============================================================
 // @desc    Admin login
 // @route   POST /api/auth/admin-login
 // @access  Public
+// ============================================================
 router.post('/admin-login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ success: false, error: 'Please provide an email and password' });
+      return res.status(400).json({ success: false, error: 'Please provide email and password' });
     }
 
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
 
     if (!user || !user.isAdmin) {
-      return res.status(401).json({ success: false, error: 'Invalid credentials or you are not an admin' });
+      return res.status(401).json({ success: false, error: 'Invalid credentials or not an admin account' });
     }
 
     const isMatch = await user.matchPassword(password);
@@ -158,20 +198,29 @@ router.post('/admin-login', async (req, res) => {
 
     sendTokenResponse(user, 200, res);
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    console.error('[AUTH] Admin login error:', error.message);
+    res.status(500).json({ success: false, error: 'Server error during admin login' });
   }
 });
 
-// @desc    Forgot Password
+// ============================================================
+// @desc    Forgot Password (sends OTP)
 // @route   POST /api/auth/forgot-password
 // @access  Public
+// ============================================================
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await User.findOne({ email });
+
+    if (!email) {
+      return res.status(400).json({ success: false, error: 'Please provide your email address' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
 
     if (!user) {
-      return res.status(404).json({ success: false, error: 'There is no user with that email' });
+      // Security: Don't reveal if the email exists or not
+      return res.status(200).json({ success: true, message: 'If this email exists, an OTP has been sent to it.' });
     }
 
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -181,39 +230,45 @@ router.post('/forgot-password', async (req, res) => {
     user.otpExpires = otpExpires;
     await user.save({ validateBeforeSave: false });
 
-    res.status(200).json({ success: true, message: 'OTP verification sent to your email.' });
+    // Respond immediately, send email in background
+    res.status(200).json({ success: true, message: 'If this email exists, an OTP has been sent to it.' });
 
-    // Send email asynchronously and log specifically for Render
-    console.log(`[AUTH] Sending Forgot Password OTP to: ${user.email}`);
+    // Send email asynchronously
+    const sendEmail = require('../utils/sendEmail');
     sendEmail({
       email: user.email,
       subject: 'RentHub Password Reset OTP',
-      message: `Your RentHub password reset code is: ${otpCode}. It is valid for 10 minutes.`
+      message: `Your RentHub password reset code is: ${otpCode}. It is valid for 10 minutes. If you did not request this, please ignore this email.`
     }).then(() => {
-      console.log(`[AUTH] Successfully sent Forgot Password OTP to: ${user.email}`);
+      console.log(`[AUTH] Forgot password OTP sent to: ${user.email}`);
     }).catch(emailErr => {
-      console.error(`[AUTH] FAILED to send email to ${user.email}:`, emailErr.message);
-      console.warn('[AUTH] Tip: Ensure EMAIL_PASSWORD is set to a 16-letter App Password in Render.');
+      console.error(`[AUTH] Failed to send OTP email to ${user.email}:`, emailErr.message);
     });
 
   } catch (error) {
-    console.error(error);
+    console.error('[AUTH] Forgot password error:', error);
     res.status(500).json({ success: false, error: 'Server error processing request' });
   }
 });
 
-// @desc    Reset Password
+// ============================================================
+// @desc    Reset Password with OTP
 // @route   POST /api/auth/reset-password
 // @access  Public
+// ============================================================
 router.post('/reset-password', async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
-    
-    if (!newPassword || newPassword.length < 6) {
+
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ success: false, error: 'Email, OTP and new password are required' });
+    }
+
+    if (newPassword.length < 6) {
       return res.status(400).json({ success: false, error: 'Password must be at least 6 characters' });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
 
     if (!user) {
       return res.status(404).json({ success: false, error: 'User not found' });
@@ -223,15 +278,15 @@ router.post('/reset-password', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Invalid or expired OTP code' });
     }
 
-    // Set new password (the pre-save hook in User model will hash it)
+    // Update password — pre-save hook will hash it
     user.password = newPassword;
     user.otpCode = undefined;
     user.otpExpires = undefined;
     await user.save();
 
-    res.status(200).json({ success: true, message: 'Password updated successfully' });
+    res.status(200).json({ success: true, message: 'Password updated successfully. You can now log in.' });
   } catch (error) {
-    console.error(error);
+    console.error('[AUTH] Reset password error:', error);
     res.status(500).json({ success: false, error: 'Server error resetting password' });
   }
 });

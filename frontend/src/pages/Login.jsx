@@ -19,15 +19,16 @@ const Login = () => {
 
     try {
       await login(email, password);
-      
-      // Automatic redirect for Admin if they use normal login
-      if (email.toLowerCase() === 'admin@renthub.com') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/dashboard');
-      }
+      navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed');
+      const errorData = err.response?.data;
+      const message = errorData?.error || 'Login failed. Please try again.';
+      setError(message);
+
+      // If the server says the user doesn't exist, redirect to register after 2s
+      if (errorData?.shouldSignUp) {
+        setTimeout(() => navigate(`/register`), 2000);
+      }
     } finally {
       setLoading(false);
     }
@@ -44,7 +45,16 @@ const Login = () => {
           <p className="text-muted">Sign in to your RentHub account</p>
         </div>
 
-        {error && <div className="p-3 mb-4 badge-danger rounded text-center">{error}</div>}
+        {error && (
+          <div className="p-3 mb-4 badge-danger rounded text-center">
+            <p>{error}</p>
+            {error.includes('sign up') && (
+              <p className="mt-2 text-sm">
+                Redirecting to <Link to="/register" className="font-bold underline">Sign Up</Link>...
+              </p>
+            )}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">

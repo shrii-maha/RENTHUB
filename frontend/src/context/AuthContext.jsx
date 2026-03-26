@@ -7,9 +7,12 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // On mount: check if there's a valid session (token in localStorage or cookie)
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem('token');
+
+      // No token at all - skip the /me call
       if (!token) {
         setLoading(false);
         return;
@@ -19,10 +22,9 @@ export const AuthProvider = ({ children }) => {
         const res = await api.get('/auth/me');
         setUser(res.data.data);
       } catch (err) {
-        console.error('Initial auth check failed:', err.message);
-        if (err.response && err.response.status === 401) {
-          localStorage.removeItem('token');
-        }
+        console.warn('[AUTH] Session check failed:', err.response?.data?.error || err.message);
+        // Clear stale token
+        localStorage.removeItem('token');
         setUser(null);
       } finally {
         setLoading(false);
@@ -32,6 +34,7 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
+  // Login — stores token in both localStorage (for Bearer header) & cookie (HttpOnly from server)
   const login = async (email, password, isAdminLogin = false) => {
     const url = isAdminLogin ? '/auth/admin-login' : '/auth/login';
     const res = await api.post(url, { email, password });
@@ -40,6 +43,7 @@ export const AuthProvider = ({ children }) => {
     return res.data;
   };
 
+  // Register — same as login after success
   const register = async (userData) => {
     const res = await api.post('/auth/register', userData);
     localStorage.setItem('token', res.data.token);
@@ -47,9 +51,17 @@ export const AuthProvider = ({ children }) => {
     return res.data;
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
+  // Logout — clear localStorage token and cookie via backend
+  const logout = async () => {
+    try {
+      await api.get('/auth/logout');
+    } catch (err) {
+      // Don't block logout if the API call fails
+      console.warn('[AUTH] Logout API call failed:', err.message);
+    } finally {
+      localStorage.removeItem('token');
+      setUser(null);
+    }
   };
 
   return (
