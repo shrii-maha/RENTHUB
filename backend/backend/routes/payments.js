@@ -39,8 +39,8 @@ router.post('/checkout/:rentalId', protect, async (req, res) => {
         }
       ],
       mode: 'payment',
-      success_url: `${process.env.CLIENT_URL}/payment-success/${rental._id}?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.CLIENT_URL}/my-rentals`
+      success_url: `${process.env.CLIENT_URL}/#/payment-success/${rental._id}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.CLIENT_URL}/#/my-rentals`
     });
 
     res.status(200).json({ success: true, url: session.url });
@@ -106,7 +106,7 @@ router.post('/success/:rentalId', protect, async (req, res) => {
             <h1>Payment Confirmed!</h1>
             <p>Hi ${populatedRental.renter.fullName},</p>
             <p>Your payment for <strong>${populatedRental.item.name}</strong> was successful. Your rental is now active.</p>
-            <p>You can view and print your invoice here: <a href="${process.env.CLIENT_URL}/invoice/${populatedRental._id}">${process.env.CLIENT_URL}/invoice/${populatedRental._id}</a></p>
+            <p>You can view and print your invoice here: <a href="${process.env.CLIENT_URL}/#/invoice/${populatedRental._id}">${process.env.CLIENT_URL}/#/invoice/${populatedRental._id}</a></p>
             <p>Thank you for using RentHub!</p>
           `
         }).catch(err => console.error('Buyer email failed:', err.message));
@@ -136,7 +136,7 @@ router.post('/success/:rentalId', protect, async (req, res) => {
             <p><strong>Owner:</strong> ${populatedRental.item.owner.fullName} (${populatedRental.item.owner.email})</p>
             <p><strong>Total Price:</strong> ₹${populatedRental.totalPrice}</p>
             <p><strong>Deposit:</strong> ₹${populatedRental.depositAmount}</p>
-            <p><a href="${process.env.CLIENT_URL}/admin/rentals">Review in Admin Panel</a></p>
+            <p><a href="${process.env.CLIENT_URL}/#/admin/rentals">Review in Admin Panel</a></p>
           `
         }).catch(err => console.error('Admin email failed:', err.message));
         
