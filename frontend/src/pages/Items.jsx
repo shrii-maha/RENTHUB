@@ -14,14 +14,16 @@ const Items = () => {
   const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
   const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
   const [sort, setSort] = useState(searchParams.get('sort') || 'newest');
+  const [error, setError] = useState(null);
 
   const fetchItems = async () => {
     setLoading(true);
+    setError(null);
     try {
       let url = '/items?';
       const params = new URLSearchParams();
       if (q) params.append('q', q);
-      if (category && category !== 'All') params.append('category', category);
+      if (category && category !== 'All') params.append('category', category.toLowerCase());
       if (minPrice) params.append('minPrice', minPrice);
       if (maxPrice) params.append('maxPrice', maxPrice);
       if (sort) params.append('sort', sort);
@@ -29,10 +31,15 @@ const Items = () => {
       const res = await api.get(`${url}${params.toString()}`);
       setItems(res.data.data);
     } catch (err) {
-      console.error(err);
+      console.error('Fetch error:', err);
+      setError('Connection failed. Please check your internet or refresh.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault(); // Prevents page reload
   };
 
   // Live Search with Debounce
@@ -181,8 +188,14 @@ const Items = () => {
           </div>
         </aside>
 
-        {/* Results Grid */}
         <div className="flex-grow">
+          {error && (
+            <div className="card bg-rose-50 border-rose-100 text-rose-600 mb-6 p-4 flex items-center justify-between">
+              <span className="font-medium">{error}</span>
+              <button onClick={fetchItems} className="btn btn-danger py-1 px-3 text-xs">Retry</button>
+            </div>
+          )}
+
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-50 animate-pulse">
               {[1, 2, 3, 4, 5, 6].map(i => (
