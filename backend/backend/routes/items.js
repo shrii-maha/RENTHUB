@@ -22,22 +22,41 @@ router.get('/', async (req, res) => {
     removeFields.forEach(param => delete reqQuery[param]);
 
     // Create query object
-    let queryStr = JSON.stringify(reqQuery);
+    const mongoQuery = { isAvailable: true };
 
-    query = Item.find({ isAvailable: true }).populate('owner', 'fullName');
-
-    // Search query
+    // Search query (Name OR Description)
     if (req.query.q) {
-      query = query.find({ name: { $regex: req.query.q, $options: 'i' } });
+      const searchRegex = new RegExp(req.query.q, 'i');
+      mongoQuery.$or = [
+        { name: searchRegex },
+        { description: searchRegex }
+      ];
     }
 
     // Category filter
     if (req.query.category && req.query.category !== 'All') {
-      query = query.find({ category: req.query.category.toLowerCase() });
+      mongoQuery.category = req.query.category.toLowerCase();
     }
 
-    // Sort by latest
-    query = query.sort('-createdAt');
+    // Price Range Filter
+    if (req.query.minPrice || req.query.maxPrice) {
+      mongoQuery.rentalPrice = {};
+      if (req.query.minPrice) mongoQuery.rentalPrice.$gte = Number(req.query.minPrice);
+      if (req.query.maxPrice) mongoQuery.rentalPrice.$lte = Number(req.query.maxPrice);
+    }
+
+    // Start building query
+    query = Item.find(mongoQuery).populate('owner', 'fullName');
+
+    // Advanced Sorting
+    const sortBy = req.query.sort || 'newest';
+    if (sortBy === 'price-asc') {
+      query = query.sort('rentalPrice');
+    } else if (sortBy === 'price-desc') {
+      query = query.sort('-rentalPrice');
+    } else {
+      query = query.sort('-createdAt'); // default to 'newest'
+    }
 
     const items = await query;
 
