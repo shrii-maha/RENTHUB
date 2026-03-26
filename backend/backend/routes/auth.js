@@ -1,10 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const crypto = require('crypto');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { protect } = require('../middleware/auth');
-const sendEmail = require('../utils/sendEmail');
 const mockDb = require('../utils/mockDb');
 
 // Get token from model, create cookie and send response
@@ -56,12 +54,7 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, error: 'User already exists' });
     }
 
-    // Generate secure verification token
-    const rawToken = crypto.randomBytes(32).toString('hex');
-    const verificationToken = crypto.createHash('sha256').update(rawToken).digest('hex');
-    const verificationTokenExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-
-    // Create user
+    // Simply create user — no email verification needed
     const user = await User.create({
       fullName,
       email,
@@ -72,31 +65,8 @@ router.post('/register', async (req, res) => {
       accountHolderName,
       accountNumber,
       ifscCode,
-      verificationToken,
-      verificationTokenExpire
+      isVerified: true // Auto-verify all users
     });
-
-    const verificationUrl = `${process.env.CLIENT_URL}/#/verify-email?token=${rawToken}`;
-
-    // Send Email with verification link (fire and forget)
-    sendEmail({
-      email: user.email,
-      subject: 'RentHub - Please Verify Your Email Address',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9fafb; border-radius: 8px;">
-          <h1 style="color: #4F46E5; font-size: 24px;">Welcome to RentHub! 🎉</h1>
-          <p style="color: #374151; font-size: 16px;">Hi <strong>${user.fullName}</strong>,</p>
-          <p style="color: #374151;">Thank you for registering! Please verify your email address by clicking the button below:</p>
-          <div style="text-align: center; margin: 32px 0;">
-            <a href="${verificationUrl}" style="background: #4F46E5; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: 600;">✅ Verify Email Address</a>
-          </div>
-          <p style="color: #6B7280; font-size: 13px;">If the button doesn't work, copy and paste this link into your browser:</p>
-          <p style="color: #6B7280; font-size: 12px; word-break: break-all;">${verificationUrl}</p>
-          <p style="color: #9CA3AF; font-size: 12px;">This link expires in 24 hours. If you didn't create an account, you can ignore this email.</p>
-        </div>
-      `
-    }).then(() => console.log(`[AUTH] Verification email sent to: ${user.email}`))
-      .catch(err => console.error(`[AUTH] Failed to send verification email:`, err.message));
 
     sendTokenResponse(user, 201, res);
   } catch (error) {
@@ -187,135 +157,6 @@ router.post('/admin-login', async (req, res) => {
     }
 
     sendTokenResponse(user, 200, res);
-  } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
-  }
-});
-
-// @desc    Verify Email via token (link-based)
-// @route   GET /api/auth/verify-email
-// @access  Public
-router.get('/verify-email', async (req, res) => {
-  try {
-    const { token } = req.query;
-
-    if (!token) {
-      return res.status(400).json({ success: false, message: 'No verification token provided.' });
-    }
-
-    // Hash the raw token to compare with stored hash
-    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
-
-    const user = await User.findOne({
-      verificationToken: hashedToken,
-      verificationTokenExpire: { $gt: Date.now() }
-    });
-
-    if (!user) {
-      return res.status(400).json({ success: false, message: 'Verification link is invalid or has expired. Please register again.' });
-    }
-
-    // Mark user as verified and clear token
-    user.isVerified = true;
-    user.verificationToken = undefined;
-    user.verificationTokenExpire = undefined;
-    await user.save({ validateBeforeSave: false });
-
-    res.status(200).json({ success: true, message: 'Your email has been successfully verified! You can now log in.' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error during verification.' });
-  }
-});
-
-// @desc    Get current logged in user
-// @route   GET /api/auth/me
-// @access  Private
-router.get('/me', protect, async (req, res) => {
-  try {
-    if (process.env.ALLOW_MOCK_LOGIN === 'true') {
-      return res.status(200).json({
-        success: true,
-        data: req.user
-      });
-    }
-
-    const user = await User.findById(req.user.id).maxTimeMS(2000);
-    res.status(200).json({
-      success: true,
-      data: user
-    });
-  } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
-  }
-});
-
-// @desc    Verify OTP
-// @route   POST /api/auth/verify-otp
-// @access  Private
-router.post('/verify-otp', protect, async (req, res) => {
-  try {
-    const { otp } = req.body;
-    const user = await User.findById(req.user.id);
-
-    if (!user) {
-      return res.status(404).json({ success: false, error: 'User not found' });
-    }
-
-    if (user.isVerified) {
-      return res.status(400).json({ success: false, error: 'User already verified' });
-    }
-
-    if (user.otpCode !== otp || user.otpExpires < Date.now()) {
-      return res.status(400).json({ success: false, error: 'Invalid or expired OTP' });
-    }
-
-    user.isVerified = true;
-    user.otpCode = undefined;
-    user.otpExpires = undefined;
-    await user.save();
-
-    res.status(200).json({
-      success: true,
-      data: user
-    });
-  } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
-  }
-});
-
-// @desc    Resend OTP
-// @route   POST /api/auth/resend-otp
-// @access  Private
-router.post('/resend-otp', protect, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id);
-
-    if (!user) {
-      return res.status(404).json({ success: false, error: 'User not found' });
-    }
-
-    if (user.isVerified) {
-      return res.status(400).json({ success: false, error: 'User already verified' });
-    }
-
-    // Generate new OTP
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
-
-    user.otpCode = otpCode;
-    user.otpExpires = otpExpires;
-    await user.save();
-
-    await sendEmail({
-      email: user.email,
-      subject: 'RentHub New Verification Code',
-      message: `Your new RentHub verification code is: ${otpCode}. Valid for 10 minutes.`
-    });
-
-    res.status(200).json({
-      success: true,
-      message: 'OTP resent successfully'
-    });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }

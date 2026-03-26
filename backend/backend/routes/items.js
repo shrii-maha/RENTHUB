@@ -4,7 +4,6 @@ const Item = require('../models/Item');
 const Rental = require('../models/Rental');
 const Review = require('../models/Review');
 const { protect } = require('../middleware/auth');
-const { verified } = require('../middleware/verify');
 const upload = require('../middleware/upload');
 
 // @desc    Get all available items (with search & filtering)
@@ -120,7 +119,7 @@ router.get('/:id', async (req, res) => {
 // @desc    Create new item
 // @route   POST /api/items
 // @access  Private
-router.post('/', protect, verified, upload.single('image'), async (req, res) => {
+router.post('/', protect, upload.single('image'), async (req, res) => {
   try {
     req.body.owner = req.user.id;
     
@@ -203,7 +202,7 @@ router.patch('/:id/toggle', protect, async (req, res) => {
 // @desc    Update item
 // @route   PUT /api/items/:id
 // @access  Private
-router.put('/:id', protect, verified, upload.single('image'), async (req, res) => {
+router.put('/:id', protect, upload.single('image'), async (req, res) => {
   try {
     let item = await Item.findById(req.params.id);
 

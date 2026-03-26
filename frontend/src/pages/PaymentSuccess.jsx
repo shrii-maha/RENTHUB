@@ -48,8 +48,8 @@ const PaymentSuccess = () => {
             <div className="bg-emerald-100 text-emerald-600 p-4 rounded-full mb-2">
               <CheckCircle size={64} />
             </div>
-            <h2 className="text-3xl font-bold text-slate-800">Payment Successful!</h2>
-            <p className="text-muted">Your rental is now active. We've sent a confirmation email to your account.</p>
+            <h2 className="text-3xl font-bold text-slate-800">Payment Successful! 🎉</h2>
+            <p className="text-slate-500">Your rental is now <strong>active</strong>. Your invoice is ready to view and print below.</p>
             
             <div className="mt-8 flex flex-col gap-3 w-full">
               <Link to={`/invoice/${rentalId}`} className="btn btn-primary btn-block flex items-center justify-center gap-2">
