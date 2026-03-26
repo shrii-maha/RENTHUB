@@ -50,6 +50,12 @@ const UserSchema = new mongoose.Schema({
   otpExpires: {
     type: Date
   },
+  verificationToken: {
+    type: String
+  },
+  verificationTokenExpire: {
+    type: Date
+  },
   // Bank details
   bankName: {
     type: String,
