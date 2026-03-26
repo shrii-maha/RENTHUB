@@ -69,8 +69,8 @@ const Navbar = () => {
           )}
         </nav>
 
-        {/* Mobile menu button */}
-        <div className="mobile-menu-btn" style={{ display: 'none' }} onClick={toggleMenu}>
+        {/* Mobile menu button - visible only on small screens via CSS */}
+        <div className="mobile-menu-btn" onClick={toggleMenu}>
           {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
         </div>
       </div>

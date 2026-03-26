@@ -81,7 +81,7 @@ const ItemDetail = () => {
 
   return (
     <div className="fade-in py-4 pb-12">
-      <div className="grid grid-cols-3 gap-8 mb-12" style={{ gridTemplateColumns: '1.5fr 1fr' }}>
+      <div className="item-detail-grid grid gap-8 mb-12" style={{ gridTemplateColumns: '1.5fr 1fr' }}>
         
         {/* Left Col - Image & Details */}
         <div className="flex flex-col gap-6">
@@ -158,7 +158,7 @@ const ItemDetail = () => {
 
         {/* Right Col - Rent Form */}
         <div className="flex flex-col gap-6">
-          <div className="card sticky top-24">
+          <div className="card item-detail-sidebar sticky top-24">
             <div className="mb-6">
               <span className="badge badge-info uppercase mb-2">{item.category}</span>
               <h1 className="mb-2" style={{ fontSize: '2rem' }}>{item.name}</h1>

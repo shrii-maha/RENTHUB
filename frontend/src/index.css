@@ -305,25 +305,125 @@ textarea.form-control {
 .badge-danger { background-color: #fee2e2; color: #991b1b; }
 .badge-info { background-color: #dbeafe; color: #1e40af; }
 
-/* Responsive Grid Adapting */
-@media (max-width: 1024px) {
-  .grid-cols-4 { grid-template-columns: repeat(3, 1fr); }
+/* ============================================================
+   RESPONSIVE — Mobile-First Complete System
+   ============================================================ */
+
+/* Mobile menu button — hidden on desktop, shown on mobile */
+.mobile-menu-btn {
+  display: none;
+  cursor: pointer;
+  color: var(--text-main);
+  padding: 0.25rem;
 }
 
+/* ---- Tablet: <= 1024px ---- */
+@media (max-width: 1024px) {
+  .grid-cols-4 { grid-template-columns: repeat(3, 1fr); }
+
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.75rem; }
+}
+
+/* ---- Tablet/Mobile: <= 768px ---- */
 @media (max-width: 768px) {
-  .grid-cols-3, .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
+
+  /* Navbar */
+  .nav-links { display: none; }
+  .mobile-menu-btn { display: flex; align-items: center; }
+  .nav-container { height: 64px; }
+  .nav-brand { font-size: 1.4rem; }
+
+  /* Grids collapse */
+  .grid-cols-3,
+  .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
   .grid-cols-2 { grid-template-columns: 1fr; }
-  
-  .nav-links {
-    display: none; /* Mobile menu logic in component */
+
+  /* Typography */
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+
+  /* Spacing */
+  .container { padding: 0 1rem; }
+  .card, .glass-panel { padding: 1.25rem; }
+
+  /* Tables — allow horizontal scroll on mobile */
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+
+  /* Flex wrapping */
+  .flex-wrap-mobile {
+    flex-wrap: wrap;
+  }
+
+  /* Forms — 2-col → 1-col */
+  .grid-cols-2.form-grid { grid-template-columns: 1fr; }
+  .col-span-2 { grid-column: span 1; }
+
+  /* Hide less important text on mobile */
+  .hide-mobile { display: none; }
+}
+
+/* ---- Small Mobile: <= 480px ---- */
+@media (max-width: 480px) {
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4 { grid-template-columns: 1fr; }
+
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.25rem; }
+  h3 { font-size: 1.1rem; }
+
+  .card, .glass-panel { padding: 1rem; }
+  .container { padding: 0 0.75rem; }
+
+  /* Buttons — full-width on tiny screens */
+  .btn { padding: 0.65rem 1rem; font-size: 0.9rem; }
+
+  /* Stack flex items vertically */
+  .flex-sm-col {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* Dashboard stat cards - 2-col on small mobile */
+  .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
+
+  /* Hero text */
+  .hero-title { font-size: 1.6rem !important; }
+}
+
+/* ============================================================
+   ITEM DETAIL — Responsive 2-column → 1-column
+   ============================================================ */
+@media (max-width: 900px) {
+  .item-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .item-detail-sidebar {
+    position: static !important;
   }
 }
 
-@media (max-width: 480px) {
-  .grid-cols-2, .grid-cols-3, .grid-cols-4 { grid-template-columns: 1fr; }
+/* ============================================================
+   DASHBOARD — Table responsive
+   ============================================================ */
+@media (max-width: 768px) {
+  .dashboard-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--border-radius);
+  }
 }
 
-/* Animations */
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
 .fade-in {
   animation: fadeIn 0.5s ease-in;
 }
@@ -333,24 +433,112 @@ textarea.form-control {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ============================================================
+   TEXT UTILITIES
+   ============================================================ */
 .text-center { text-align: center; }
 .text-right { text-align: right; }
 .text-muted { color: var(--text-muted); }
 .text-primary { color: var(--primary); }
 .font-bold { font-weight: 700; }
+.font-medium { font-weight: 500; }
+.text-xs { font-size: 0.75rem; }
+.text-sm { font-size: 0.875rem; }
 .text-xl { font-size: 1.25rem; }
 .text-2xl { font-size: 1.5rem; }
 .text-3xl { font-size: 1.875rem; }
+.text-lg { font-size: 1.125rem; }
+.uppercase { text-transform: uppercase; }
+.capitalize { text-transform: capitalize; }
+.line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; line-clamp: 1; -webkit-box-orient: vertical; }
+.line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; }
+.whitespace-pre-wrap { white-space: pre-wrap; }
 
+/* ============================================================
+   LAYOUT UTILITIES
+   ============================================================ */
 .min-h-screen { min-height: 100vh; }
 .flex-grow { flex-grow: 1; }
 .w-full { width: 100%; }
+.h-full { height: 100%; }
+.overflow-hidden { overflow: hidden; }
+.overflow-x-auto { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.sticky { position: sticky; }
+.top-24 { top: 6rem; }
+.relative { position: relative; }
+.border-t { border-top: 1px solid rgba(0,0,0,0.1); }
+.border-b { border-bottom: 1px solid rgba(0,0,0,0.1); }
+.rounded { border-radius: 8px; }
+.rounded-full { border-radius: 9999px; }
+.rounded-lg { border-radius: 12px; }
+.shadow { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
 .max-w-md { max-width: 28rem; margin-inline: auto; }
 .max-w-xl { max-width: 36rem; margin-inline: auto; }
 .max-w-2xl { max-width: 42rem; margin-inline: auto; }
 .max-w-4xl { max-width: 56rem; margin-inline: auto; }
 
-/* Image classes */
+.mx-auto { margin-inline: auto; }
+.px-4 { padding-inline: 1rem; }
+.px-8 { padding-inline: 2rem; }
+.pb-2 { padding-bottom: 0.5rem; }
+.pb-4 { padding-bottom: 1rem; }
+.pb-12 { padding-bottom: 3rem; }
+.pt-2 { padding-top: 0.5rem; }
+.pt-4 { padding-top: 1rem; }
+.pt-6 { padding-top: 1.5rem; }
+.pt-8 { padding-top: 2rem; }
+.py-1 { padding-block: 0.25rem; }
+.py-2 { padding-block: 0.5rem; }
+.py-3 { padding-block: 0.75rem; }
+.py-12 { padding-block: 3rem; }
+.py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+.py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+.p-0 { padding: 0; }
+.p-3 { padding: 0.75rem; }
+.p-4 { padding: 1rem; }
+.p-6 { padding: 1.5rem; }
+.p-8 { padding: 2rem; }
+.p-2 { padding: 0.5rem; }
+.mb-1 { margin-bottom: 0.25rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.mb-8 { margin-bottom: 2rem; }
+.mt-1 { margin-top: 0.25rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-4 { margin-top: 1rem; }
+.mt-6 { margin-top: 1.5rem; }
+.mt-8 { margin-top: 2rem; }
+.mt-auto { margin-top: auto; }
+.ml-auto { margin-left: auto; }
+.mr-2 { margin-right: 0.5rem; }
+.gap-1 { gap: 0.25rem; }
+.gap-2 { gap: 0.5rem; }
+.gap-4 { gap: 1rem; }
+.gap-6 { gap: 1.5rem; }
+.gap-8 { gap: 2rem; }
+.w-max { width: max-content; }
+.w-2 { width: 0.5rem; }
+.h-2 { height: 0.5rem; }
+.last\:border-0:last-child { border: 0; }
+.last\:pb-0:last-child { padding-bottom: 0; }
+.hover\:bg-slate-50:hover { background-color: rgba(0,0,0,0.02); }
+.transition-colors { transition: background-color 0.2s ease; }
+.transition-opacity { transition: opacity 0.3s ease; }
+.opacity-50 { opacity: 0.5; }
+.hover\:opacity-100:hover { opacity: 1; }
+.cursor-pointer { cursor: pointer; }
+.select-none { user-select: none; }
+.text-danger { color: var(--accent); }
+.col-span-2 { grid-column: span 2; }
+.tracking-widest { letter-spacing: 0.1em; }
+.inline-flex { display: inline-flex; }
+.block { display: block; }
+
+/* ============================================================
+   IMAGE UTILITIES
+   ============================================================ */
 .img-fluid {
   max-width: 100%;
   height: auto;
@@ -362,13 +550,12 @@ textarea.form-control {
   object-fit: cover;
 }
 
-/* Modal Styles */
+/* ============================================================
+   MODAL STYLES
+   ============================================================ */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   background-color: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
   display: flex;
@@ -376,6 +563,7 @@ textarea.form-control {
   justify-content: center;
   z-index: 1000;
   animation: fadeIn 0.3s ease;
+  padding: 1rem;
 }
 
 .modal-content {
@@ -384,7 +572,7 @@ textarea.form-control {
   border-radius: 16px;
   width: 90%;
   max-width: 450px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
   position: relative;
   text-align: center;
   animation: slideUp 0.3s ease;
@@ -411,3 +599,66 @@ textarea.form-control {
   width: 100%;
   height: auto;
 }
+
+/* ============================================================
+   DARK MODE — FORM INPUTS FIX
+   ============================================================ */
+.dark-mode .form-control {
+  background-color: rgba(30, 41, 59, 0.8);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+}
+
+.dark-mode .form-control:focus {
+  background-color: rgba(30, 41, 59, 0.95);
+  border-color: var(--primary);
+}
+
+.dark-mode .modal-content {
+  background: var(--card-bg);
+  color: var(--text-main);
+}
+
+.dark-mode .qr-container {
+  background: rgba(30, 41, 59, 0.5);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode table thead tr {
+  background: rgba(255,255,255,0.03);
+}
+
+.dark-mode .hover\:bg-slate-50:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+/* ============================================================
+   FOOTER — Always on bottom, responsive
+   ============================================================ */
+footer {
+  background: var(--card-bg);
+  color: var(--text-muted);
+  text-align: center;
+  padding: 1.5rem;
+  border-top: var(--glass-border);
+  font-size: 0.875rem;
+  margin-top: auto;
+}
+
+/* ============================================================
+   MISC
+   ============================================================ */
+.btn-sm { padding: 0.4rem 0.8rem; font-size: 0.875rem; }
+.btn-lg { padding: 0.9rem 2rem; font-size: 1.1rem; }
+.text-amber-400 { color: #fbbf24; }
+.text-amber-600 { color: #d97706; }
+.text-emerald-500 { color: #10b981; }
+.bg-emerald-100 { background-color: #d1fae5; }
+.text-emerald-800 { color: #065f46; }
+.bg-rose-100 { background-color: #fee2e2; }
+.text-rose-800 { color: #991b1b; }
+.bg-blue-50 { background-color: #eff6ff; }
+.text-blue-800 { color: #1e40af; }
+.border-blue-500 { border-color: #3b82f6; }
+.border-l-4 { border-left-width: 4px; border-left-style: solid; }
+.bg-slate-50 { background-color: rgba(0,0,0,0.02); }
