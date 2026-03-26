@@ -1,0 +1,92 @@
+[
+  {
+    "name": "Canon EOS R5 Mirrorless Camera",
+    "description": "Professional-grade mirrorless camera with 45MP sensor and 8K video recording. Perfect for weddings and high-end photography.",
+    "category": "electronics",
+    "rentalPrice": 2500,
+    "depositAmount": 15000,
+    "imageFilename": "canon_r5.jpg",
+    "isAvailable": true
+  },
+  {
+    "name": "Sony WH-1000XM5 Noise Cancelling Headphones",
+    "description": "Industry-leading noise cancellation and premium sound quality. Includes carrying case and charging cable.",
+    "category": "electronics",
+    "rentalPrice": 500,
+    "depositAmount": 2000,
+    "imageFilename": "sony_headphones.jpg",
+    "isAvailable": true
+  },
+  {
+    "name": "Mountain Bike (Large Frame)",
+    "description": "Rugged mountain bike with dual suspension and 21 gears. Ideal for weekend trails and off-road adventures.",
+    "category": "vehicles",
+    "rentalPrice": 800,
+    "depositAmount": 5000,
+    "imageFilename": "mountain_bike.jpg",
+    "isAvailable": true
+  },
+  {
+    "name": "Electric Scooter (30km Range)",
+    "description": "Foldable electric scooter for city commuting. Features a top speed of 25km/h and built-in front light.",
+    "category": "vehicles",
+    "rentalPrice": 1200,
+    "depositAmount": 8000,
+    "imageFilename": "electric_scooter.jpg",
+    "isAvailable": true
+  },
+  {
+    "name": "DeWalt Cordless Power Drill Set",
+    "description": "High-performance drill with 2 rechargeable batteries and a set of 20 bits. Perfect for home DIY projects.",
+    "category": "tools",
+    "rentalPrice": 350,
+    "depositAmount": 1500,
+    "imageFilename": "drill_set.jpg",
+    "isAvailable": true
+  },
+  {
+    "name": "Pressure Washer (2000 PSI)",
+    "description": "Powerful electric pressure washer for cleaning driveways, cars, and patios. Includes multiple nozzle attachments.",
+    "category": "tools",
+    "rentalPrice": 600,
+    "depositAmount": 3000,
+    "imageFilename": "pressure_washer.jpg",
+    "isAvailable": true
+  },
+  {
+    "name": "Professional DJ Mixer & Controller",
+    "description": "4-channel DJ controller with built-in sound card and dual USB ports. Compatible with Serato and Rekordbox.",
+    "category": "party",
+    "rentalPrice": 3000,
+    "depositAmount": 20000,
+    "imageFilename": "dj_mixer.jpg",
+    "isAvailable": true
+  },
+  {
+    "name": "Portable BBQ Grill (Charcoal)",
+    "description": "Compact charcoal grill perfect for terrace parties or camping trips. Includes tongs and a cleaning brush.",
+    "category": "party",
+    "rentalPrice": 450,
+    "depositAmount": 1000,
+    "imageFilename": "bbq_grill.jpg",
+    "isAvailable": true
+  },
+  {
+    "name": "4-Person Camping Tent",
+    "description": "Weather-resistant 4-person tent with easy-setup fiberglass poles and large mesh windows for ventilation.",
+    "category": "other",
+    "rentalPrice": 700,
+    "depositAmount": 2500,
+    "imageFilename": "camping_tent.jpg",
+    "isAvailable": true
+  },
+  {
+    "name": "Electric Guitar with Amp",
+    "description": "Classic electric guitar with a 15W practice amplifier and guitar lead. Ideal for beginners and performance practice.",
+    "category": "other",
+    "rentalPrice": 900,
+    "depositAmount": 4000,
+    "imageFilename": "guitar_amp.jpg",
+    "isAvailable": true
+  }
+]
