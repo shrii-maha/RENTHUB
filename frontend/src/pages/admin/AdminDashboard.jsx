@@ -35,7 +35,7 @@ const AdminDashboard = () => {
       <AdminNav />
 
       {stats && (
-        <div className="grid grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="card text-center justify-center flex flex-col border-t-4 border-blue-500">
             <div className="text-blue-500 mb-2 flex justify-center"><Users size={32} /></div>
             <h2>{stats.totalUsers}</h2>

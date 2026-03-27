@@ -32,9 +32,9 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Router>
-          <div className="flex flex-col min-h-screen">
+          <div className="flex flex-col min-h-screen" style={{ backgroundColor: '#f8fafc' }}>
             <Navbar />
-            <main className="flex-grow container mx-auto px-4 py-8">
+            <main className="flex-grow">
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Home />} />
@@ -42,14 +42,14 @@ function App() {
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/items" element={<Items />} />
                 <Route path="/item/:id" element={<ItemDetail />} />
-                
+
                 {/* Auth Routes */}
                 <Route path="/register" element={<Register />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/verify-email" element={<VerifyEmail />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
-                
+
                 {/* Protected User Routes */}
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/add-item" element={<AddItem />} />
@@ -57,7 +57,7 @@ function App() {
                 <Route path="/edit-item/:id" element={<EditItem />} />
                 <Route path="/invoice/:id" element={<Invoice />} />
                 <Route path="/payment-success/:rentalId" element={<PaymentSuccess />} />
-                
+
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -67,8 +67,15 @@ function App() {
                 <Route path="/admin/items/edit/:id" element={<AdminEditItem />} />
               </Routes>
             </main>
-            <footer className="bg-dark text-white text-center p-4 mt-auto">
-              <p>&copy; {new Date().getFullYear()} RentHub. All rights reserved.</p>
+            <footer className="py-12 border-t border-slate-100 bg-white">
+              <div className="container">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+                  <div className="nav-brand">
+                    <span>RentHub</span>
+                  </div>
+                  <p className="text-slate-400 text-sm">&copy; {new Date().getFullYear()} RentHub Marketplace. All rights reserved.</p>
+                </div>
+              </div>
             </footer>
           </div>
         </Router>
