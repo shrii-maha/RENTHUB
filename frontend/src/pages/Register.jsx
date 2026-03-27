@@ -1,6 +1,7 @@
 import { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
+import api from '../api/axios';
 import { UserPlus } from 'lucide-react';
 
 const Register = () => {
@@ -37,8 +38,13 @@ const Register = () => {
     setLoading(true);
 
     try {
-      await register(formData);
-      navigate('/dashboard');
+      const res = await api.post('/auth/register', formData);
+      // Registration creates account but requires email verification
+      if (res.data.requiresVerification) {
+        navigate(`/verify-email?email=${encodeURIComponent(res.data.email)}`);
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed');
     } finally {

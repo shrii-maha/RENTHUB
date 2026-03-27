@@ -25,6 +25,13 @@ const Login = () => {
       const message = errorData?.error || 'Login failed. Please try again.';
       setError(message);
 
+      // If the user isn't verified, redirect to verification page
+      if (errorData?.requiresVerification) {
+        setTimeout(() => {
+          navigate(`/verify-email?email=${encodeURIComponent(errorData.email)}`);
+        }, 2000);
+      }
+
       // If the server says the user doesn't exist, redirect to register after 2s
       if (errorData?.shouldSignUp) {
         setTimeout(() => navigate(`/register`), 2000);
