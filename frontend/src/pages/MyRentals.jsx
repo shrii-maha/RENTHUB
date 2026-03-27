@@ -74,52 +74,65 @@ const MyRentals = () => {
       ) : (
         <div className="grid grid-cols-1 gap-6 max-w-4xl">
           {rentals.map(rental => (
-            <div key={rental._id} className="card p-0 overflow-hidden flex" style={{ flexDirection: 'row' }}>
-              <div style={{ width: '200px', backgroundColor: '#e2e8f0', flexShrink: 0 }}>
+            <div key={rental._id} className="card p-0 overflow-hidden" style={{ display: 'flex', flexDirection: 'row' }}>
+              {/* Item Image */}
+              <div style={{ width: '180px', minHeight: '160px', backgroundColor: '#f1f5f9', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.5rem' }}>
                 {rental.item?.imageFilename ? (
-                  <img src={getImageUrl(rental.item.imageFilename)} alt={rental.item.name} className="object-cover" />
+                  <img
+                    src={getImageUrl(rental.item.imageFilename)}
+                    alt={rental.item.name}
+                    style={{ width: '100%', height: '140px', objectFit: 'contain' }}
+                  />
                 ) : (
-                   <div className="w-full h-full flex items-center justify-center text-muted">No Image</div>
+                  <div className="w-full h-full flex items-center justify-center text-muted text-xs">No Image</div>
                 )}
               </div>
+
+              {/* Details */}
               <div className="p-6 flex-grow flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start mb-2">
-                    <h2><Link to={`/item/${rental.item?._id}`}>{rental.item?.name || 'Deleted Item'}</Link></h2>
+                    <h2 style={{ margin: 0 }}><Link to={`/item/${rental.item?._id}`}>{rental.item?.name || 'Deleted Item'}</Link></h2>
                     <span className={`badge ${getStatusBadge(rental.status)}`}>{rental.status}</span>
                   </div>
                   <p className="text-muted mb-1">Owner: {rental.item?.owner?.fullName || 'Unknown'}</p>
-                  <p className="font-bold text-lg mb-0 text-primary">Rent: ₹{rental.totalPrice}</p>
-                  <p className="font-bold text-lg mb-1 text-amber-600">Deposit: ₹{rental.depositAmount || 0}</p>
-                  <p className="font-bold text-xl mb-4 border-t pt-2">Total: ₹{rental.totalPrice + (rental.depositAmount || 0)}</p>
+                  <p className="font-bold text-lg mb-0 text-primary">Rent: ₹{rental.totalPrice.toLocaleString('en-IN')}</p>
+                  <p className="font-bold text-lg mb-1 text-amber-600">Deposit: ₹{(rental.depositAmount || 0).toLocaleString('en-IN')}</p>
+                  <p className="font-bold text-xl mb-4 border-t pt-2">
+                    Total Paid: ₹{(rental.totalPrice + (rental.depositAmount || 0)).toLocaleString('en-IN')}
+                  </p>
                 </div>
-                
+
                 <div className="pt-4 border-t" style={{ borderColor: 'rgba(0,0,0,0.1)' }}>
                   {rental.status === 'Pending' && (
-                    <p className="text-amber-600 text-sm m-0 italic">Waiting for owner approval...</p>
+                    <p className="text-amber-600 text-sm m-0 italic">⏳ Waiting for owner approval...</p>
+                  )}
+                  {rental.status === 'Rejected' && (
+                    <p className="text-rose-600 text-sm m-0">❌ The owner rejected this rental request.</p>
                   )}
                   {rental.status === 'Approved' && (
                     <div className="flex justify-between items-center">
-                      <p className="text-emerald-600 font-medium m-0 flex items-center gap-1">Request Approved! Ready for payment.</p>
-                      <button 
-                        onClick={() => handlePayment(rental)} 
+                      <p className="text-emerald-600 font-medium m-0">✅ Approved! Ready for payment.</p>
+                      <button
+                        onClick={() => handlePayment(rental)}
                         className="btn btn-primary flex items-center gap-2"
                         disabled={initiating}
                       >
-                        <CreditCard size={18} /> {initiating ? 'Processing...' : `Pay ₹${rental.totalPrice + (rental.depositAmount || 0)}`}
+                        <CreditCard size={18} /> {initiating ? 'Processing...' : `Pay ₹${(rental.totalPrice + (rental.depositAmount || 0)).toLocaleString('en-IN')}`}
                       </button>
                     </div>
                   )}
-                  {rental.status === 'Rejected' && (
-                    <p className="text-rose-600 text-sm m-0">The owner rejected this rental request.</p>
-                  )}
-                  {rental.status === 'Active' && (
+                  {(rental.status === 'Active' || rental.status === 'Completed') && (
                     <div className="flex justify-between items-center w-full">
-                      <p className="text-emerald-600 font-bold flex items-center gap-2 m-0">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500"></div> Active Rental
+                      <p className={`font-bold flex items-center gap-2 m-0 ${rental.status === 'Active' ? 'text-emerald-600' : 'text-slate-500'}`}>
+                        <div className={`w-2 h-2 rounded-full ${rental.status === 'Active' ? 'bg-emerald-500' : 'bg-slate-400'}`}></div>
+                        {rental.status === 'Active' ? 'Active Rental' : 'Completed'}
                       </p>
-                      <Link to={`/invoice/${rental._id}`} className="btn btn-outline text-xs py-1 px-3 flex items-center gap-1">
-                         <Download size={14} /> View Invoice
+                      <Link
+                        to={`/invoice/${rental._id}`}
+                        className="btn btn-primary text-sm py-2 px-4 flex items-center gap-2"
+                      >
+                        <Download size={14} /> View Bill
                       </Link>
                     </div>
                   )}
