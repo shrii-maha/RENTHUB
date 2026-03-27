@@ -4,6 +4,7 @@ const Rental = require('../models/Rental');
 const Item = require('../models/Item');
 const { protect } = require('../middleware/auth');
 const { verified } = require('../middleware/verify');
+const sendEmail = require('../utils/sendEmail');
 
 // @desc    Request a rental
 // @route   POST /api/rentals
@@ -53,14 +54,17 @@ router.post('/', protect, verified, async (req, res) => {
 // @access  Private
 router.get('/my', protect, async (req, res) => {
   try {
-    const rentals = await Rental.find({ renter: req.user.id })
+    const rentalsList = await Rental.find({ renter: req.user.id })
       .populate('item', 'name imageFilename rentalPrice owner')
       .sort('-rentalDate');
 
+    // Filter out rentals where the item has been deleted
+    const filteredRentals = rentalsList.filter(r => r.item !== null);
+    
     res.status(200).json({
       success: true,
-      count: rentals.length,
-      data: rentals
+      count: filteredRentals.length,
+      data: filteredRentals
     });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });

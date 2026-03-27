@@ -76,15 +76,18 @@ const MyRentals = () => {
           {rentals.map(rental => (
             <div key={rental._id} className="card p-0 overflow-hidden" style={{ display: 'flex', flexDirection: 'row' }}>
               {/* Item Image */}
-              <div style={{ width: '180px', minHeight: '160px', backgroundColor: '#f1f5f9', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.5rem' }}>
+              <div style={{ width: '180px', minHeight: '160px', backgroundColor: '#f8fafc', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', borderRight: '1px solid #f1f5f9' }}>
                 {rental.item?.imageFilename ? (
                   <img
                     src={getImageUrl(rental.item.imageFilename)}
                     alt={rental.item.name}
-                    style={{ width: '100%', height: '140px', objectFit: 'contain' }}
+                    style={{ width: '100%', height: '140px', objectFit: 'contain', filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.05))' }}
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-muted text-xs">No Image</div>
+                  <div className="flex flex-col items-center justify-center text-slate-300 gap-2 uppercase tracking-widest text-[10px] font-bold">
+                    <PackageOpen size={32} strokeWidth={1.5} />
+                    No Preview
+                  </div>
                 )}
               </div>
 
@@ -92,15 +95,32 @@ const MyRentals = () => {
               <div className="p-6 flex-grow flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start mb-2">
-                    <h2 style={{ margin: 0 }}><Link to={`/item/${rental.item?._id}`}>{rental.item?.name || 'Deleted Item'}</Link></h2>
-                    <span className={`badge ${getStatusBadge(rental.status)}`}>{rental.status}</span>
+                    <h2 className="text-xl font-bold text-slate-800 tracking-tight" style={{ margin: 0 }}>
+                      {rental.item ? (
+                        <Link to={`/item/${rental.item._id}`} className="hover:text-primary transition-colors">{rental.item.name}</Link>
+                      ) : (
+                        <span className="text-slate-400 italic">Deleted Product</span>
+                      )}
+                    </h2>
+                    <span className={`badge ${getStatusBadge(rental.status)} px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest`}>{rental.status}</span>
                   </div>
-                  <p className="text-muted mb-1">Owner: {rental.item?.owner?.fullName || 'Unknown'}</p>
-                  <p className="font-bold text-lg mb-0 text-primary">Rent: ₹{rental.totalPrice.toLocaleString('en-IN')}</p>
-                  <p className="font-bold text-lg mb-1 text-amber-600">Deposit: ₹{(rental.depositAmount || 0).toLocaleString('en-IN')}</p>
-                  <p className="font-bold text-xl mb-4 border-t pt-2">
-                    Total Paid: ₹{(rental.totalPrice + (rental.depositAmount || 0)).toLocaleString('en-IN')}
-                  </p>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">OWNER: {rental.item?.owner?.fullName || 'System'}</p>
+                  
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Rental Fee</p>
+                      <p className="text-lg font-black text-slate-900 m-0">₹{rental.totalPrice.toLocaleString('en-IN')}</p>
+                    </div>
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Security Deposit</p>
+                      <p className="text-lg font-black text-amber-600 m-0">₹{(rental.depositAmount || 0).toLocaleString('en-IN')}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center bg-indigo-50/50 p-3 rounded-xl border border-indigo-100/50">
+                    <p className="text-xs text-indigo-900 font-bold uppercase tracking-widest m-0">Total Paid Amount</p>
+                    <p className="text-xl font-black text-primary m-0">₹{(rental.totalPrice + (rental.depositAmount || 0)).toLocaleString('en-IN')}</p>
+                  </div>
                 </div>
 
                 <div className="pt-4 border-t" style={{ borderColor: 'rgba(0,0,0,0.1)' }}>

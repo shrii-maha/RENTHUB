@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
-import { Search, Filter } from 'lucide-react';
+import { Search, SlidersHorizontal, ArrowRight, PackageOpen } from 'lucide-react';
 import { getImageUrl } from '../utils/imageUtils';
 
 const Items = () => {
@@ -11,24 +11,17 @@ const Items = () => {
   
   const [q, setQ] = useState(searchParams.get('q') || '');
   const [category, setCategory] = useState(searchParams.get('category') || 'All');
-  const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
-  const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
-  const [sort, setSort] = useState(searchParams.get('sort') || 'newest');
   const [error, setError] = useState(null);
 
   const fetchItems = async () => {
     setLoading(true);
     setError(null);
     try {
-      let url = '/items?';
       const params = new URLSearchParams();
       if (q) params.append('q', q);
       if (category && category !== 'All') params.append('category', category.toLowerCase());
-      if (minPrice) params.append('minPrice', minPrice);
-      if (maxPrice) params.append('maxPrice', maxPrice);
-      if (sort) params.append('sort', sort);
       
-      const res = await api.get(`${url}${params.toString()}`);
+      const res = await api.get(`/items?${params.toString()}`);
       setItems(res.data.data);
     } catch (err) {
       console.error('Fetch error:', err);
@@ -38,24 +31,17 @@ const Items = () => {
     }
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault(); // Prevents page reload
-  };
-
   // Live Search with Debounce
   useEffect(() => {
     const timer = setTimeout(() => {
       const params = {};
       if (q) params.q = q;
       if (category && category !== 'All') params.category = category;
-      if (sort && sort !== 'newest') params.sort = sort;
-      if (minPrice) params.minPrice = minPrice;
-      if (maxPrice) params.maxPrice = maxPrice;
       setSearchParams(params);
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [q, category, sort, minPrice, maxPrice]);
+  }, [q, category, setSearchParams]);
 
   useEffect(() => {
     fetchItems();
@@ -64,235 +50,154 @@ const Items = () => {
   const handleClearFilters = () => {
     setQ('');
     setCategory('All');
-    setMinPrice('');
-    setMaxPrice('');
-    setSort('newest');
     setSearchParams({});
   };
 
   return (
-    <div className="fade-in py-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1>Browse Items</h1>
+    <div className="fade-in max-w-7xl mx-auto px-4 py-8">
+      {/* ── Page Header ── */}
+      <div className="text-center mb-12">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
+          Explore the <span className="text-primary italic">Catalog</span>
+        </h1>
+        <p className="text-lg text-slate-500 max-w-2xl mx-auto">
+          Premium rentals at your fingertips. Find high-end tech, vehicles, and tools instantly.
+        </p>
       </div>
 
-      {/* ── Search Bar ── */}
-      <div className="card mb-6" style={{ padding: '1rem 1.25rem' }}>
-        <form onSubmit={handleSearch}>
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-
-            {/* Search Input — takes all remaining space */}
-            <div style={{ flex: 1, position: 'relative' }}>
+      {/* ── Hero Search Area ── */}
+      <div className="relative max-w-3xl mx-auto mb-16">
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-primary to-indigo-400 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+          <div className="relative bg-white rounded-2xl shadow-xl flex items-center p-2">
+            <div className="flex-grow relative border-r border-slate-100 pr-2">
               <Search
-                size={16}
-                style={{
-                  position: 'absolute', left: '0.9rem',
-                  top: '50%', transform: 'translateY(-50%)',
-                  color: 'var(--text-muted)', pointerEvents: 'none'
-                }}
+                size={20}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 pointer-events-none"
               />
               <input
                 type="text"
-                placeholder="Search items by name..."
+                placeholder="What are you looking for?"
                 className="form-control"
-                style={{ paddingLeft: '2.5rem', height: '44px', borderRadius: '10px', marginBottom: 0 }}
+                style={{ 
+                  border: 'none', 
+                  boxShadow: 'none', 
+                  paddingLeft: '3.5rem', 
+                  height: '56px', 
+                  fontSize: '1.125rem',
+                  marginBottom: 0
+                }}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
               />
             </div>
-
-            {/* Category Dropdown — fixed width */}
-            <div style={{ width: '180px', flexShrink: 0, position: 'relative' }}>
-              <Filter
-                size={15}
-                style={{
-                  position: 'absolute', left: '0.9rem',
-                  top: '50%', transform: 'translateY(-50%)',
-                  color: 'var(--text-muted)', pointerEvents: 'none', zIndex: 1
-                }}
-              />
-              <select
-                className="form-control"
-                style={{
-                  paddingLeft: '2.5rem', height: '44px',
-                  borderRadius: '10px', appearance: 'none',
-                  cursor: 'pointer', marginBottom: 0
-                }}
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-              >
-                <option value="All">All Categories</option>
-                <option value="electronics">Electronics</option>
-                <option value="vehicles">Vehicles</option>
-                <option value="tools">Tools</option>
-                <option value="party">Party Supplies</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-
-            {/* Search Button */}
-            <button
-              type="submit"
-              className="btn btn-primary"
-              style={{ height: '44px', minWidth: '110px', borderRadius: '10px', flexShrink: 0 }}
-            >
-              <Search size={16} /> Search
+            <button className="hidden md:flex btn btn-primary px-8 h-12 rounded-xl items-center gap-2 transform active:scale-95 transition-transform">
+              Find Items
+            </button>
+            <button className="md:hidden btn btn-primary p-3 rounded-xl ml-2">
+               <Search size={22} />
             </button>
           </div>
-        </form>
+        </div>
+
+        {/* Category Bubbles */}
+        <div className="flex flex-wrap justify-center gap-3 mt-8">
+          {['All', 'Electronics', 'Vehicles', 'Tools', 'Party', 'Other'].map(cat => (
+            <button
+              key={cat}
+              onClick={() => setCategory(cat)}
+              className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 transform hover:-translate-y-0.5 ${
+                category.toLowerCase() === cat.toLowerCase()
+                  ? 'bg-primary text-white shadow-lg shadow-indigo-100'
+                  : 'bg-white text-slate-500 hover:bg-slate-50 border border-slate-100'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Category Pills */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '2rem', justifyContent: 'center' }}>
-        {['All', 'Electronics', 'Vehicles', 'Tools', 'Party', 'Other'].map(cat => (
-          <button
-            key={cat}
-            onClick={() => setCategory(cat)}
-            style={{
-              padding: '0.4rem 1.2rem',
-              borderRadius: '9999px',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              cursor: 'pointer',
-              border: category.toLowerCase() === cat.toLowerCase() ? 'none' : '1px solid rgba(0,0,0,0.1)',
-              background: category.toLowerCase() === cat.toLowerCase() ? 'var(--primary)' : 'transparent',
-              color: category.toLowerCase() === cat.toLowerCase() ? 'white' : 'var(--text-muted)',
-              transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar Filters */}
-        <aside className="w-full lg:w-64 flex-shrink-0 space-y-6">
-          <div className="card p-5">
-            <h4 className="flex items-center gap-2 mb-4 font-bold text-slate-800">
-              <Filter size={18} /> Filters
-            </h4>
-            
-            <div className="space-y-4">
-              {/* Sort By */}
-              <div>
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Sort By</label>
-                <select 
-                  className="form-control text-sm"
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value)}
-                >
-                  <option value="newest">Newest First</option>
-                  <option value="price-asc">Price: Low to High</option>
-                  <option value="price-desc">Price: High to Low</option>
-                </select>
-              </div>
-
-              {/* Price Range */}
-              <div>
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Price Range</label>
-                <div className="flex gap-2 items-center">
-                  <input 
-                    type="number" 
-                    placeholder="Min" 
-                    className="form-control text-sm px-2"
-                    value={minPrice}
-                    onChange={(e) => setMinPrice(e.target.value)}
-                  />
-                  <span className="text-slate-400">-</span>
-                  <input 
-                    type="number" 
-                    placeholder="Max" 
-                    className="form-control text-sm px-2"
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <button 
-                onClick={handleClearFilters}
-                className="btn btn-outline btn-block text-xs py-2 mt-4"
-              >
-                Clear All
-              </button>
-            </div>
+      {/* ── Results Section ── */}
+      <div className="w-full">
+        {error && (
+          <div className="max-w-md mx-auto card bg-rose-50 border-rose-100 text-rose-600 mb-12 p-5 flex items-center justify-between shadow-sm">
+            <span className="font-medium">{error}</span>
+            <button onClick={fetchItems} className="btn btn-danger py-2 px-4 text-xs font-bold uppercase tracking-wider">Retry</button>
           </div>
-        </aside>
+        )}
 
-        <div className="flex-grow">
-          {error && (
-            <div className="card bg-rose-50 border-rose-100 text-rose-600 mb-6 p-4 flex items-center justify-between">
-              <span className="font-medium">{error}</span>
-              <button onClick={fetchItems} className="btn btn-danger py-1 px-3 text-xs">Retry</button>
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+              <div key={i} className="card h-[420px] bg-slate-50 border-none animate-pulse rounded-2xl"></div>
+            ))}
+          </div>
+        ) : items.length === 0 ? (
+          <div className="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-100 max-w-2xl mx-auto shadow-sm">
+            <div className="text-slate-200 mb-6 flex justify-center transform scale-125">
+               <PackageOpen size={96} />
             </div>
-          )}
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">Nothing found here</h2>
+            <p className="text-slate-500 mb-8 max-w-xs mx-auto">We couldn't find any items matching your current filters.</p>
+            <button onClick={handleClearFilters} className="btn btn-primary px-10 py-3 rounded-xl">Clear and Reset</button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-20">
+            {items.map(item => (
+              <div 
+                key={item._id} 
+                className="group relative bg-white rounded-2xl border border-slate-100 overflow-hidden flex flex-col transition-all duration-500 hover:shadow-[0_20px_50px_rgba(8,_112,_184,_0.1)] hover:-translate-y-2"
+              >
+                {/* Image Container */}
+                <Link to={`/item/${item._id}`} className="block relative aspect-[4/3] overflow-hidden bg-slate-50">
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10"></div>
+                  <div className="w-full h-full p-4 flex items-center justify-center">
+                    {item.imageFilename ? (
+                      <img
+                        src={getImageUrl(item.imageFilename)}
+                        alt={item.name}
+                        className="w-full h-full object-contain transform group-hover:scale-105 transition-transform duration-700"
+                      />
+                    ) : (
+                      <div className="text-slate-300 font-bold text-xs tracking-widest uppercase">No Preview</div>
+                    )}
+                  </div>
+                  {/* Category Tag */}
+                  <span className="absolute top-4 left-4 z-20 bg-white/90 backdrop-blur-md text-primary text-[10px] font-bold px-3 py-1.5 rounded-lg shadow-sm uppercase tracking-wider">
+                    {item.category}
+                  </span>
+                </Link>
 
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-50 animate-pulse">
-              {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="card h-80 bg-slate-100"></div>
-              ))}
-            </div>
-          ) : items.length === 0 ? (
-            <div className="card text-center py-20 bg-slate-50 border-dashed border-2 border-slate-200">
-              <div className="text-slate-300 mb-4 flex justify-center"><Search size={64} /></div>
-              <h3 className="text-slate-800 font-bold">No results found</h3>
-              <p className="text-slate-500 mb-6">Try adjusting your filters or search terms.</p>
-              <button onClick={handleClearFilters} className="btn btn-primary">Reset Filters</button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {items.map(item => (
-                <div 
-                  key={item._id} 
-                  className="card p-0 overflow-hidden flex flex-col group transition-all duration-300 hover:shadow-2xl hover:-translate-y-2"
-                  style={{ border: 'none', background: 'white', borderBottom: '4px solid transparent' }}
-                >
-                  <Link to={`/item/${item._id}`} style={{ display: 'block' }} className="relative overflow-hidden aspect-video">
-                    <div
-                      className="w-full h-full flex items-center justify-center"
-                      style={{
-                        backgroundColor: '#f8faff',
-                        height: '200px',
-                        padding: '0.5rem'
-                      }}
-                    >
-                      {item.imageFilename ? (
-                        <img
-                          src={getImageUrl(item.imageFilename)}
-                          alt={item.name}
-                          style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', transition: 'transform 0.7s ease' }}
-                          className="group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-slate-300 uppercase text-xs font-bold">No Preview</div>
-                      )}
-                    </div>
-                  </Link>
-                  <div className="p-5 flex-grow flex flex-col">
-                    <div className="flex justify-between items-start mb-2">
-                       <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">{item.category}</span>
-                       <span className="text-[10px] text-slate-400 font-medium">{new Date(item.createdAt).toLocaleDateString()}</span>
-                    </div>
-                    <h3 className="text-lg font-bold text-slate-800 mb-2 truncate group-hover:text-indigo-600 transition-colors">
+                {/* Content */}
+                <div className="p-6 flex-grow flex flex-col">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-xl font-bold text-slate-800 leading-tight group-hover:text-primary transition-colors duration-300">
                       <Link to={`/item/${item._id}`}>{item.name}</Link>
                     </h3>
-                    <p className="text-slate-500 text-sm mb-4 line-clamp-2 leading-relaxed flex-grow">{item.description}</p>
-                    <div className="mt-auto flex justify-between items-center pt-4 border-t border-slate-50">
-                      <div>
-                        <span className="text-xs text-slate-400 block mb-[-2px]">Per Day</span>
-                        <span className="font-ex-bold text-xl text-slate-900">₹{item.rentalPrice}</span>
-                      </div>
-                      <Link to={`/item/${item._id}`} className="btn btn-primary rounded-lg py-2 px-6 shadow-indigo-200 shadow-lg group-hover:bg-indigo-700">Rent Now</Link>
+                  </div>
+                  
+                  <p className="text-slate-500 text-sm mb-6 line-clamp-2 leading-relaxed h-10">
+                    {item.description}
+                  </p>
+
+                  <div className="mt-auto flex items-center justify-between border-t border-slate-50 pt-5">
+                    <div>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Rental Daily</p>
+                        <p className="text-2xl font-black text-slate-900">₹{item.rentalPrice.toLocaleString('en-IN')}</p>
                     </div>
+                    <Link 
+                      to={`/item/${item._id}`} 
+                      className="bg-slate-900 text-white p-3 rounded-xl hover:bg-primary transition-all duration-300 shadow-xl shadow-slate-200 group-hover:shadow-primary/20"
+                    >
+                      <ArrowRight size={20} />
+                    </Link>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
